@@ -1,0 +1,259 @@
+SIMPLE  =                    T / Standard FITS Format                           BITPIX  =                    8 / Character data                                 NAXIS   =                    0 / No Image --- just extension(s)                 EXTEND  =                    T / There are standard extensions                  ORIGIN  = 'xml2fits_v1.95'     / Converted from XML-Astrores to FITS                                     e-mail: question@simbad.u-strasbg.fr                   COMMENT  ARG='-rm'                                                              LONGSTRN= 'OGIP 1.0'           / Long string convention (&/CONTINUE) may be usedDATE    = '2016-03-08'         / Written on 2016-03-08:14:55:28 (GMT)                                        by: apache@vizier.u-strasbg.fr                              **********************************************************                          EXCERPT from catalogues stored in VizieR (CDS)                                             with the following conditions:                                   **********************************************************                                                                                                      VizieR Astronomical Server vizier.u-strasbg.fr                                  Date: 2016-03-08T14:55:28 [V1.99+ (14-Oct-2013)]                                Explanations and Statistics of UCDs: See LINK below                             In case of problem, please report to: cds-question@unistra.fr                                                                                          INFO    = 'votable-version=1.99+ (14-Oct-2013)' / #                             INFO    = '-ref=VIZ56dee4a43cc9' / #                                            INFO    = '-out.max=unlimited' / #                                              Q-PARAMS=                   15 / Number of queryParameters (followed by list)            -oc.form=dec                                                                    -out.max=unlimited                                                              #out.form=FITS (binary) Table                                                   -nav=cat:J/ApJS/187/275&tab:{J/ApJS/187/275/mags}&key:source=J/ApJS/187         /275/mags&HTTPPRM:&&-ref=VIZ56dee4a43cc9&-out.src=J/ApJS/187/275/mags&-         order=I&-out=Name&Name=V2487                                                    Oph&-out=n_Name&-out=JD&-out=Band&-out=l_mag&-out=mag&-out=e_mag&-out=S         ource&-meta.ucd=2&-meta=1&-meta.foot=1&-usenav=1&-bmark=POST&-oc.form=d         ec&-out.max=unlimited&-out.form=FITS (binary) Table&undefined=CDS,              France&                                                                         -source=J/ApJS/187/275/mags                                                     -order=I                                                                        -out=Name                                                                       Name=V394 CrA                                                                   -out=n_Name                                                                     -out=JD                                                                         -out=Band                                                                       -out=l_mag                                                                      -out=mag                                                                        -out=e_mag                                                                      -out=Source                                                                     #                                                                               #RESOURCE=yCat_21870275                                                         #Name: J/ApJS/187/275                                                           #Title: Photometric histories of recurrent novae (Schaefer, 2010)      END                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             XTENSION= 'BINTABLE'           / Binary Table Extension                         BITPIX  =                    8 / binary data                                    NAXIS   =                    2 / Simple 2-D matrix                              NAXIS1  =                   48 / Number of bytes per record                     NAXIS2  =                  504 / Number of records                              PCOUNT  =                    0 / Get rid of random parameters                   GCOUNT  =                    1 / Only one group (isn't it obvious?)             TFIELDS =                    8 / Number of data fields (columns)                CDS-CAT = 'J/ApJS/187/275'     / Catalogue designation in CDS nomenclature               Photometric histories of recurrent novae (Schaefer, 2010)              EXTNAME = 'J_ApJS_187_275_mags' / Identification of the table                   CDS-NAME= 'J/ApJS/187/275/mags' / Table name in METAtab                                  All observations of recurrent novae {\em(tables 5 and 22 of paper)}    UCD__1  = 'meta.id;meta.main'  / ................................byte#0         TDISP1  = 'A9      '           / Display Fortran Format                         TFORM1  = '9A      '           / Ascii string                                   TTYPE1  = 'Name    '           / Recurrent nova name                            UCD__2  = 'meta.note'          / ................................byte#9         TDISP2  = 'A1      '           / Display Fortran Format                         TFORM2  = 'A       '           / Ascii string                                   TTYPE2  = 'n_Name  '           / {\bf e}ruptive of {\bf q}uiescent mode         UCD__3  = 'time.epoch'         / ................................byte#10        TDISP3  = 'F13.5   '           / Display Fortran Format                         TFORM3  = 'D       '           / 64-bit floating-point (double precision)       TTYPE3  = 'JD      '           / Julian Date of the observation                 TUNIT3  = 'd       '           / day                                            UCD__4  = 'instr.bandpass;obs' / ................................byte#18        TDISP4  = 'A2      '           / Display Fortran Format                         TFORM4  = '2A      '           / Ascii string                                   TTYPE4  = 'Band    '           / Filter passband of the observation (1)         UCD__5  = 'meta.code.error'    / ................................byte#20        TDISP5  = 'A1      '           / Display Fortran Format                         TFORM5  = 'A       '           / Ascii string                                   TTYPE5  = 'l_mag   '           / Limit flag on mag                              UCD__6  = 'phot.mag'           / ................................byte#21        TDISP6  = 'F6.3    '           / Display Fortran Format                         TFORM6  = 'E       '           / 32-bit floating-point (simple precision)       TTYPE6  = 'mag     '           / Observed magnitude in Band                     TUNIT6  = 'mag     '           / magnitude                                      UCD__7  = 'stat.error;phot.mag' / ...............................byte#25        TDISP7  = 'F5.2    '           / Display Fortran Format                         TFORM7  = 'E       '           / 32-bit floating-point (simple precision)       TTYPE7  = 'e_mag   '           / ? Uncertainty in mag                           TUNIT7  = 'mag     '           / magnitude                                      UCD__8  = 'meta.note'          / ................................byte#29        TDISP8  = 'A19     '           / Display Fortran Format                         TFORM8  = '19A     '           / Ascii string                                   TTYPE8  = 'Source  '           / Source of the observation                      END                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             V394 CrA eAB«Q€   V  A(  >™šAAVSO              V394 CrA eAB«R    V  A)™š>™šAAVSO              V394 CrA eAB«RxÔýôV  A   >™šAAVSO              V394 CrA eAB«RŒÌÌÍV  A+33>™šAAVSO              V394 CrA qAB¬±íoB  A™p¤<õÂCTIO 0.9-m         V394 CrA qAB¬²H6ãB  A™¸<õÂCTIO 0.9-m         V394 CrA qAB¬²L„µÝB  A™…<õÂCTIO 0.9-m         V394 CrA qAB¬²M}¿HB  A™ë…<õÂCTIO 0.9-m         V394 CrA qAB¬²NsØB  A™p¤<õÂCTIO 0.9-m         V394 CrA qAB¬²\!-B  AšQì<õÂCTIO 0.9-m         V394 CrA qAB¬²]!ÿ.B  Ašzá<õÂCTIO 0.9-m         V394 CrA qAB¬²^šB  Aš=q<õÂCTIO 0.9-m         V394 CrA qAB¬²g»/ìB  AšõÃ<õÂCTIO 0.9-m         V394 CrA qAB¬²h¾íB  Aš¸R<õÂCTIO 0.9-m         V394 CrA qAB¬²i·YB  AšõÃ<õÂCTIO 0.9-m         V394 CrA qAB¬²j\)B  A›33<õÂCTIO 0.9-m         V394 CrA qAB¬²k˜ÇãB  A›33<õÂCTIO 0.9-m         V394 CrA qAB¬²l‹C–B  A›®<õÂCTIO 0.9-m         V394 CrA qAB¬²æL/ƒB  A¢(ö<õÂCTIO 0.9-m         V394 CrA qAB¬²èŒçB  A¢¸R<õÂCTIO 0.9-m         V394 CrA qAB¬²é£n/B  A£ë…<õÂCTIO 0.9-m         V394 CrA qAB¬²ê’£B  A¡×
+<õÂCTIO 0.9-m         V394 CrA qAB¬²ë…¸B  A¡™š<õÂCTIO 0.9-m         V394 CrA qAB¬³?l‹DB  A›G®<õÂCTIO 0.9-m         V394 CrA qAB¬³@hÛŒB  A›×
+<õÂCTIO 0.9-m         V394 CrA qAB¬³K…¸B  Aœzá<õÂCTIO 0.9-m         V394 CrA qAB¬³L„µÝV  A•G®=LÌÍCTIO 0.9-m         V394 CrA qAB¬³MŠÚºU  A˜áH=¸QìCTIO 0.9-m         V394 CrA qAB¬³Nÿ—B  AœQì<õÂCTIO 0.9-m         V394 CrA qAB¬³_XâB  A›\)<õÂCTIO 0.9-m         V394 CrA qAB¬³ÄðØEB  Ašff<õÂCTIO 0.9-m         V394 CrA qAB¬³ÏU›=B  Ašzá<õÂCTIO 0.9-m         V394 CrA qAB¬³ÐhÛŒB  Aš(ö<õÂCTIO 0.9-m         V394 CrA qAB¬³Ñhr°B  A™®<õÂCTIO 0.9-m         V394 CrA qAB¬³Ò^5?B  A™™š<õÂCTIO 0.9-m         V394 CrA qAB¬´]ãSøB  A›33<õÂCTIO 0.9-m         V394 CrA qAB¬´Æ_Ø®B  Aœ¸R<õÂCTIO 0.9-m         V394 CrA qAB¬´Ïeý‹B  AŸ33<õÂCTIO 0.9-m         V394 CrA qAB¬´ÐhÛŒB  AŸ¸<õÂCTIO 0.9-m         V394 CrA qAB¬´ÑrGEB  Ažff<õÂCTIO 0.9-m         V394 CrA qAB¬´Ò’£B  Až\<õÂCTIO 0.9-m         V394 CrA qAB¬´Óˆe•B  Až(ö<õÂCTIO 0.9-m         V394 CrA qAB¬´×ÈK^B  Ažzá<õÂCTIO 0.9-m         V394 CrA qAB¬´ÙQ‚ªB  A®<õÂCTIO 0.9-m         V394 CrA qAB¬´ÚGE9B  Až  <õÂCTIO 0.9-m         V394 CrA qAB¬´Þ$Ý/B  AG®<õÂCTIO 0.9-m         V394 CrA qAB¬´åoB  Aœ¸R<õÂCTIO 0.9-m         V394 CrA qAB¬´ìPHB  AœQì<õÂCTIO 0.9-m         V394 CrA qAB¬µSÍ5¨B  A33<õÂCTIO 0.9-m         V394 CrA qAB¬µ`oiDB  A›33<õÂCTIO 0.9-m         V394 CrA qAB¬µem\ûB  A›…<õÂCTIO 0.9-m         V394 CrA qAB¬µfi­CB  A›p¤<õÂCTIO 0.9-m         V394 CrA qAB¬µg\(öB  AšQì<õÂCTIO 0.9-m         V394 CrA qAB¬µn?B  A›\)<õÂCTIO 0.9-m         V394 CrA qAB¬µoAòB  A›¸<õÂCTIO 0.9-m         V394 CrA qAB¬µp4mÆB  AšõÃ<õÂCTIO 0.9-m         V394 CrA qAB¬µq*0UB  A›¸<õÂCTIO 0.9-m         V394 CrA qAB¬µÃ¶E¢B  Až£×<õÂCTIO 0.9-m         V394 CrA qAB¬µÄFs‚B  AÂ<õÂCTIO 0.9-m         V394 CrA qAB¬µÌ²•êB  Aš£×<õÂCTIO 0.9-m         V394 CrA qAB¬µÓÝ—öB  A›¸<õÂCTIO 0.9-m         V394 CrA qAB¬¶CÀ7B  Až¸R<õÂCTIO 0.9-m         V394 CrA qAB¬¶E›=B  Až¸R<õÂCTIO 0.9-m         V394 CrA qAB¬¶F«6zB  A×
+<õÂCTIO 0.9-m         V394 CrA qAB¬¶G²-B  Až=q<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÁŒ~(B  AŸ×
+<õÂCTIO 0.9-m         V394 CrA qAB¬¶Ã×ÜB  Až£×<õÂCTIO 0.9-m         V394 CrA qAB¬¶Ä˜_B  AŸ33<õÂCTIO 0.9-m         V394 CrA qAB¬¶Çß;dB  Až¸R<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÈõÂB  A™š<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÑG®B  A›p¤<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÒqÞjB  A™Â<õÂCTIO 0.9-m         V394 CrA qAB¬¶Ón.²B  A˜õÃ<õÂCTIO 0.9-m         V394 CrA qAB¬¶Ô`ªeB  A˜¸R<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÕVlôB  A˜ÌÍ<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÖR½<B  A—™š<õÂCTIO 0.9-m         V394 CrA qAB¬¶×E8ïB  A˜  <õÂCTIO 0.9-m         V394 CrA qAB¬¶Ø7´¢B  A—\)<õÂCTIO 0.9-m         V394 CrA qAB¬¶Ù™™šB  A™¸<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÚŒMB  A˜áH<õÂCTIO 0.9-m         V394 CrA qAB¬¶Û~‘ B  A™ë…<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÜtSB  Aš{<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÝÖ8†B  A›33<õÂCTIO 0.9-m         V394 CrA qAB¬¶ÞÈ´9B  A›
+=<õÂCTIO 0.9-m         V394 CrA qAB¬¶ßÈK^B  A™ë…<õÂCTIO 0.9-m         V394 CrA qAB¬¶à¾íB  A™
+=<õÂCTIO 0.9-m         V394 CrA qAB¬¶á­BÄB  A˜\<õÂCTIO 0.9-m         V394 CrA qAB¬¶â¬ÙèB  A˜=q<õÂCTIO 0.9-m         V394 CrA qAB¬¶ãŸU›B  A™×
+<õÂCTIO 0.9-m         V394 CrA qAB¬¶ä•+B  A™™š<õÂCTIO 0.9-m         V394 CrA qAB¬¶å‘hsB  Aš{<õÂCTIO 0.9-m         V394 CrA qAB¬¶æ€IB  A—™š<õÂCTIO 0.9-m         V394 CrA qAB¬¶çv_ÙB  A˜áH<õÂCTIO 0.9-m         V394 CrA qAB¬¶èË’B  A˜{<õÂCTIO 0.9-m         V394 CrA qAB¬¶érGEB  A˜¸R<õÂCTIO 0.9-m         V394 CrA qAB¬¶ê£SB  A™\)<õÂCTIO 0.9-m         V394 CrA qAB¬¶ë×ÜB  A—33<õÂCTIO 0.9-m         V394 CrA qAB¬·<¹#£B  Až=q<õÂCTIO 0.9-m         V394 CrA qAB¬·=¸ºÇB  A›…<õÂCTIO 0.9-m         V394 CrA qAB¬·>«6zB  Aœ  <õÂCTIO 0.9-m         V394 CrA qAB¬·?²-B  A›®<õÂCTIO 0.9-m         V394 CrA qAB¬·@-àB  A›®<õÂCTIO 0.9-m         V394 CrA qAB¬·A‚©“B  A›…<õÂCTIO 0.9-m         V394 CrA qAB¬·B^5?B  AšáH<õÂCTIO 0.9-m         V394 CrA qAB¬·G!-wB  A›33<õÂCTIO 0.9-m         V394 CrA qAB¬·I4êB  A™×
+<õÂCTIO 0.9-m         V394 CrA qAB¬·J0U2B  AšõÃ<õÂCTIO 0.9-m         V394 CrA qAB¬·K"ÐåB  AœQì<õÂCTIO 0.9-m         V394 CrA qAB¬·LL˜B  A›Â<õÂCTIO 0.9-m         V394 CrA qAB¬·Lýó¶B  A™ë…<õÂCTIO 0.9-m         V394 CrA qAB¬·N_pB  A›Â<õÂCTIO 0.9-m         V394 CrA qAB¬·NùÛ#B  Ašzá<õÂCTIO 0.9-m         V394 CrA qAB¬·Oü¹$B  Aš¸R<õÂCTIO 0.9-m         V394 CrA qAB¬·Pò{³B  Aš{<õÂCTIO 0.9-m         V394 CrA qAB¬·Qä÷fB  A›Â<õÂCTIO 0.9-m         V394 CrA qAB¬·WË)B  Až¸R<õÂCTIO 0.9-m         V394 CrA qAB¬·X	Ô•B  A£p¤<õÂCTIO 0.9-m         V394 CrA qAB¬·Xù	lB  A¢  <õÂCTIO 0.9-m         V394 CrA qAB¬·âCþ]B  A›×
+<õÂCTIO 0.9-m         V394 CrA qAB¬·ã9ÀìB  A›Â<õÂCTIO 0.9-m         V394 CrA qAB¬·ä<žíB  AœQì<õÂCTIO 0.9-m         V394 CrA qAB¬·å<6B  A…<õÂCTIO 0.9-m         V394 CrA qAB¬·æ1ø¡B  Aœzá<õÂCTIO 0.9-m         V394 CrA qAB¬·ç.HéB  AœõÃ<õÂCTIO 0.9-m         V394 CrA qAB¬·è'RTB  A…<õÂCTIO 0.9-m         V394 CrA qAB°FæšÔ,B  A–£×=¸QìCTIO 0.9-m         V394 CrA qAB°Fè}¿B  A—G®=¸QìCTIO 0.9-m         V394 CrA qAB°Fé‰7LB  A—33=¸QìCTIO 0.9-m         V394 CrA qAB°Fêø7µB  A—p¤=¸QìCTIO 0.9-m         V394 CrA qAB°FìcñAB  A—G®=¸QìCTIO 0.9-m         V394 CrA qAB°Fí¡ÊÁB  A—33=¸QìCTIO 0.9-m         V394 CrA qAB°Fîö”FB  A—×
+=¸QìCTIO 0.9-m         V394 CrA qAB°JÐ†YKB  A–¸R=¸QìCTIO 0.9-m         V394 CrA qAB°KåÖ8†B  A–(ö=¸QìCTIO 0.9-m         V394 CrA qAB°KçAòB  A•®=¸QìCTIO 0.9-m         V394 CrA qAB°Kè°ò|B  A•Â=¸QìCTIO 0.9-m         V394 CrA qAB°Kê¬B  A—×
+=¸QìCTIO 0.9-m         V394 CrA qAB°L>“B  A–zá=¸QìCTIO 0.9-m         V394 CrA qAB°LKœ¿B  A–\=¸QìCTIO 0.9-m         V394 CrA qAB°L[µtB  A—G®=¸QìCTIO 0.9-m         V394 CrA qAB°LÃ…¸B  A”õÃ=¸QìCTIO 0.9-m         V394 CrA qAB°LÄðØEB  A•™š=¸QìCTIO 0.9-m         V394 CrA qAB°LÕ¥B  A–Qì=¸QìCTIO 0.9-m         V394 CrA qAB°L×B  A–õÃ=¸QìCTIO 0.9-m         V394 CrA qAB°LàQë…B  A—×
+=¸QìCTIO 0.9-m         V394 CrA qAB°Láë…B  A˜(ö=¸QìCTIO 0.9-m         V394 CrA qAB°Lè$xB  A˜áH=¸QìCTIO 0.9-m         V394 CrA qAB°Léaä÷B  A—G®=¸QìCTIO 0.9-m         V394 CrA qAB°M?U›=B  A˜\=¸QìCTIO 0.9-m         V394 CrA qAB°MGškQB  A–ff=¸QìCTIO 0.9-m         V394 CrA qAB°óRÞ ÒB  A”ff<£×
+CTIO 0.9-m         V394 CrA qAB°óT?åÉB  A”=q<£×
+CTIO 0.9-m         V394 CrA qAB°ód“uB  A“Â<£×
+CTIO 0.9-m         V394 CrA qAB°óem\ûB  A“ë…<£×
+CTIO 0.9-m         V394 CrA qAB°ófÙ‡B  A”(ö<£×
+CTIO 0.9-m         V394 CrA qAB°óh7´¢B  A”ff<£×
+CTIO 0.9-m         V394 CrA qAB°ólC,¥B  A“ë…<£×
+CTIO 0.9-m         V394 CrA qAB°óm¡ÊÁB  A”  <£×
+CTIO 0.9-m         V394 CrA qAB°óo hÜB  A“p¤<£×
+CTIO 0.9-m         V394 CrA qAB°ópbMÓB  A”  <£×
+CTIO 0.9-m         V394 CrA qAB°óqÄ2ÊB  A“…<£×
+CTIO 0.9-m         V394 CrA qAB°ós"ÐåB  A“®<£×
+CTIO 0.9-m         V394 CrA qAB°ót„µÝB  A“®<£×
+CTIO 0.9-m         V394 CrA qAB°ó½`A‰B  A•G®<£×
+CTIO 0.9-m         V394 CrA qAB°ó½ÜÆ?B  A•™š<£×
+CTIO 0.9-m         V394 CrA qAB°ó¾ì¿±U  A”=q=#×
+CTIO 0.9-m         V394 CrA qAB°óÄ%®æB  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°óÅ‡“ÞB  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°óÆì¿±B  A•\)<£×
+CTIO 0.9-m         V394 CrA qAB°óÈHðB  A•\)<£×
+CTIO 0.9-m         V394 CrA qAB°óËg ùB  A•G®<£×
+CTIO 0.9-m         V394 CrA qAB°ô@ºÇB  A•×
+<£×
+CTIO 0.9-m         V394 CrA qAB°ôBòåB  A•™š<£×
+CTIO 0.9-m         V394 CrA qAB°ôC×ÜB  A•™š<£×
+CTIO 0.9-m         V394 CrA qAB°ôLIº^B  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°ôM«ŸVB  A•®<£×
+CTIO 0.9-m         V394 CrA qAB°ôOË)B  A•Â<£×
+CTIO 0.9-m         V394 CrA qAB°ôPoiDB  A•ë…<£×
+CTIO 0.9-m         V394 CrA qAB°ôV!–SB  A–  <£×
+CTIO 0.9-m         V394 CrA qAB°ôWƒ{JB  A•™š<£×
+CTIO 0.9-m         V394 CrA qAB°ôf¾ß¤B  A•\)<£×
+CTIO 0.9-m         V394 CrA qAB°ôh}¿B  A•¸<£×
+CTIO 0.9-m         V394 CrA qAB°ôi|ÚB  A•33<£×
+CTIO 0.9-m         V394 CrA qAB°ôjÞ ÒB  A•¸<£×
+CTIO 0.9-m         V394 CrA qAB°ôn1ø¡B  A•¸<£×
+CTIO 0.9-m         V394 CrA qAB°ôo–¼B  A•p¤<£×
+CTIO 0.9-m         V394 CrA qAB°ôpï4×B  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°ôrQÎB  A•G®<£×
+CTIO 0.9-m         V394 CrA qAB°ô¾R½<B  A—¸<£×
+CTIO 0.9-m         V394 CrA qAB°ô¿±[WB  A–¸R<£×
+CTIO 0.9-m         V394 CrA qAB°ôÁ@OB  A–zá<£×
+CTIO 0.9-m         V394 CrA qAB°ôÂdÂøB  A–zá<£×
+CTIO 0.9-m         V394 CrA qAB°ôÃä%¯B  A–{<£×
+CTIO 0.9-m         V394 CrA qAB°ôÅ8ï5B  A–(ö<£×
+CTIO 0.9-m         V394 CrA qAB°ôÌSŽóB  A”¸R<£×
+CTIO 0.9-m         V394 CrA qAB°ôÍµsëB  A”\<£×
+CTIO 0.9-m         V394 CrA qAB°ôÏXâB  A”zá<£×
+CTIO 0.9-m         V394 CrA qAB°ôÐuöýB  A”£×<£×
+CTIO 0.9-m         V394 CrA qAB°ôÑÔ•B  A•33<£×
+CTIO 0.9-m         V394 CrA qAB°õ¾—PB  A•G®<£×
+CTIO 0.9-m         V394 CrA qAB°õ¿ü¹$B  A•\)<£×
+CTIO 0.9-m         V394 CrA qAB°õÁ[W?B  A–Qì<£×
+CTIO 0.9-m         V394 CrA qAB°õÂ½<6B  A–\<£×
+CTIO 0.9-m         V394 CrA qAB°õÄ!-B  A–{<£×
+CTIO 0.9-m         V394 CrA qAB°õÅ%B  A–Qì<£×
+CTIO 0.9-m         V394 CrA qAB°õÆËûB  A–Qì<£×
+CTIO 0.9-m         V394 CrA qAB°õï®{B  A–{<£×
+CTIO 0.9-m         V394 CrA qAB°õñaä÷B  A•×
+<£×
+CTIO 0.9-m         V394 CrA qAB°öCÃaB  A•ë…<õÂCTIO 0.9-m         V394 CrA qAB°öE+ÓÃB  A•ë…=#×
+CTIO 0.9-m         V394 CrA qAB°öh-àB  A”zá<£×
+CTIO 0.9-m         V394 CrA qAB°öm(B  A”õÃ<£×
+CTIO 0.9-m         V394 CrA qAB°öni­CB  A”õÃ<£×
+CTIO 0.9-m         V394 CrA qAB°öoË’:B  A•\)<£×
+CTIO 0.9-m         V394 CrA qAB°öq*0UB  A•\)<£×
+CTIO 0.9-m         V394 CrA qAB°ö½—ö+B  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°ö¿Ë)B  A•™š<£×
+CTIO 0.9-m         V394 CrA qAB°öÁ@OB  A•×
+<£×
+CTIO 0.9-m         V394 CrA qAB°öÂçÕgB  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°öÊÊW¨B  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°öÌ(õÃB  A•…<£×
+CTIO 0.9-m         V394 CrA qAB°öÍ—ö+B  A•…<£×
+CTIO 0.9-m         V394 CrA qAB±·B×sB  A˜zá=#×
+CTIO 0.9-m         V394 CrA qAB±·ÓŸU›B  A›ë…=#×
+CTIO 0.9-m         V394 CrA qAB±¸CŸU›B  Ašff=#×
+CTIO 0.9-m         V394 CrA qAB±¸dµÜÆB  A™\)=#×
+CTIO 0.9-m         V394 CrA qAB±¸Õ:“B  A™Â=#×
+CTIO 0.9-m         V394 CrA qAB±¸çØ­¬B  Aš=q=#×
+CTIO 0.9-m         V394 CrA qAB±¹=qvB  A™33=#×
+CTIO 0.9-m         V394 CrA qAB±¹>—PB  A™p¤=#×
+CTIO 0.9-m         V394 CrA qAB±¹G´¢4B  A™Â=#×
+CTIO 0.9-m         V394 CrA qAB±¹I*0UB  AšõÃ=#×
+CTIO 0.9-m         V394 CrA qAB±¹J’£B  AšáH=#×
+CTIO 0.9-m         V394 CrA qAB±¹UL˜_B  A›p¤=#×
+CTIO 0.9-m         V394 CrA qAB±¹aÀëîB  A›™š=#×
+CTIO 0.9-m         V394 CrA qAB²Ilýó¶B  A’\=#×
+CTIO 0.9-m         V394 CrA qAB²IàÑ·B  A’\=#×
+CTIO 0.9-m         V394 CrA qAB²IäÚQB  A‘×
+=#×
+CTIO 0.9-m         V394 CrA qAB²JÙÞB  A”{=#×
+CTIO 0.9-m         V394 CrA qAB²KßÈK^B  A“ë…=#×
+CTIO 0.9-m         V394 CrA qAB²Lìo B  A”¸R=#×
+CTIO 0.9-m         V394 CrA qAB·a>«6zB  A–ff=õÂSMARTS 1.0-m       V394 CrA qAB·a?åÉR  A”£×=LÌÍSMARTS 1.0-m       V394 CrA qAB·aXÎp;R  A’=q<õÂSMARTS 1.0-m       V394 CrA qAB·aYø B  A–¸R=\)SMARTS 1.0-m       V394 CrA qAB·agö+kR  A“p¤=#×
+SMARTS 1.0-m       V394 CrA qAB·ahõÂB  A˜zá=£×
+SMARTS 1.0-m       V394 CrA qAB·aîµR  A—¸=¸QìSMARTS 1.0-m       V394 CrA qAB·bºëCR  A˜{=¸QìSMARTS 1.0-m       V394 CrA qAB·bÆ4R  A“×
+=¸QìSMARTS 1.0-m       V394 CrA qAB·bÆ1ø¡R  A”\=#×
+SMARTS 1.0-m       V394 CrA qAB·bÇ>«6B  A˜õÃ=£×
+SMARTS 1.0-m       V394 CrA qAB·bÑ*0UR  A“Â=ÌÌÍSMARTS 1.0-m       V394 CrA qAB·bÑaä÷R  A“G®=LÌÍSMARTS 1.0-m       V394 CrA qAB·bÒ’£R  A’¸R=#×
+SMARTS 1.0-m       V394 CrA qAB·bÓ’:*B  A˜Qì=áG®SMARTS 1.0-m       V394 CrA qAB·bè·€4R  A’ff=LÌÍSMARTS 1.0-m       V394 CrA qAB·bð_÷R  A’zá=¸QìSMARTS 1.0-m       V394 CrA qAB·dCþ\’R  A–£×=LÌÍSMARTS 1.0-m       V394 CrA qAB·dDô!R  A–=q=uÂSMARTS 1.0-m       V394 CrA qAB·dÝL˜_R  A”\=uÂSMARTS 1.0-m       V394 CrA qAB·dÞHè§R  A”  =uÂSMARTS 1.0-m       V394 CrA qAB·eSquŽR  A•…=#×
+SMARTS 1.0-m       V394 CrA qAB·e×škQR  A•\)<õÂSMARTS 1.0-m       V394 CrA qAB·fGOßR  A”¸R=uÂSMARTS 1.0-m       V394 CrA qAB·fGÁ½¥R  A”\=#×
+SMARTS 1.0-m       V394 CrA qAB¸:JŒR  A“33<£×
+SMARTS 1.3-m       V394 CrA qAB¸?l‹DR  A”¸R=uÂSMARTS 1.3-m       V394 CrA qAB¸@Ë’R  A”ff=#×
+SMARTS 1.3-m       V394 CrA qAB¸BJŒR  A“ë…<õÂSMARTS 1.3-m       V394 CrA qAB¸C¹Œ~R  A“®<õÂSMARTS 1.3-m       V394 CrA qAB¸FvÈ´R  A’áH<£×
+SMARTS 1.3-m       V394 CrA qAB¸GåÉR  A’(ö<£×
+SMARTS 1.3-m       V394 CrA qAB¸IDg8R  A‘Â<£×
+SMARTS 1.3-m       V394 CrA qAB¸J³g¡R  A‘G®<£×
+SMARTS 1.3-m       V394 CrA qAB¸L¼R  A‘
+=<£×
+SMARTS 1.3-m       V394 CrA qAB¸P6ãR  A£×<£×
+SMARTS 1.3-m       V394 CrA qAB¸Q£n/R  A¸R<£×
+SMARTS 1.3-m       V394 CrA qAB¸Sn˜R  AQì<£×
+SMARTS 1.3-m       V394 CrA qAB¸GRTaR  A‘…=ÌÌÍSMARTS 1.3-m       V394 CrA qAB¸å`A‰R  Aff=LÌÍSMARTS 1.3-m       V394 CrA qAB¸UðoiR  A‘\)<£×
+SMARTS 1.3-m       V394 CrA qAB¸W_oÒR  A‘Â<õÂSMARTS 1.3-m       V394 CrA qAB¸XDÐR  A‘®<£×
+SMARTS 1.3-m       V394 CrA qAB¸Y=ÙR  A‘Â<õÂSMARTS 1.3-m       V394 CrA qAB¸Z)ÇzR  A‘Â<£×
+SMARTS 1.3-m       V394 CrA qAB¸[ÚQB  A\)=#×
+SMARTS 1.3-m       V394 CrA qAB¸\Ö¡bB  AÂ=#×
+SMARTS 1.3-m       V394 CrA qAB¸]Â\B  A…=#×
+SMARTS 1.3-m       V394 CrA qAB¸`-àR  A’£×<£×
+SMARTS 1.3-m       V394 CrA qAB¸dcñAR  A’õÃ<£×
+SMARTS 1.3-m       V394 CrA qAB¸eOß;R  A“
+=<£×
+SMARTS 1.3-m       V394 CrA qAB¸iÅR  A’\<£×
+SMARTS 1.3-m       V394 CrA qAB¸j{²ÿR  A’ff<£×
+SMARTS 1.3-m       V394 CrA qAB¸nÿ—R  A’  <£×
+SMARTS 1.3-m       V394 CrA qAB¸o|í‘R  A‘®<£×
+SMARTS 1.3-m       V394 CrA qAB¸têJŒV  A•ë…<õÂSMARTS 1.3-m       V394 CrA qAB¸uÖ8†V  A•ë…<õÂSMARTS 1.3-m       V394 CrA qAB¸xuöýR  A‘\)=#×
+SMARTS 1.3-m       V394 CrA qAB¸yaä÷R  A‘\)=#×
+SMARTS 1.3-m       V394 CrA qAB¸zdÂøR  A’\=¸QìSMARTS 1.3-m       V394 CrA qAB¸r)ÇzR  A‘p¤=#×
+SMARTS 1.3-m       V394 CrA qAB¸têKR  A‘33=#×
+SMARTS 1.3-m       V394 CrA qAB¸ujR  A‘33=#×
+SMARTS 1.3-m       V394 CrA qAB¸vÈ´9R  A‘…<õÂSMARTS 1.3-m       V394 CrA qAB¸x*™1R  A‘¸<õÂSMARTS 1.3-m       V394 CrA qAB¸y‰7LR  A‘×
+=uÂSMARTS 1.3-m       V394 CrA qAB¸äžìÀR  A“p¤>#×
+SMARTS 1.3-m       V394 CrA qAB¸å‘hsR  A“G®=uÂSMARTS 1.3-m       V394 CrA qAB¸çéùR  A“…>8QìSMARTS 1.3-m       V394 CrA qAB¸èâeR  A”áH>8QìSMARTS 1.3-m       V394 CrA qAB¸íVR  A’¸R=#×
+SMARTS 1.3-m       V394 CrA qAB¸î Ñ·R  A“G®=\)SMARTS 1.3-m       V394 CrA qAB¸ñ^žR  A“…=¸QìSMARTS 1.3-m       V394 CrA qAB¸òQÎR  A“¸=\)SMARTS 1.3-m       V394 CrA qAB¸ô¹#£R  A’{=#×
+SMARTS 1.3-m       V394 CrA qAB¸õ®æ2R  A’{=#×
+SMARTS 1.3-m       V394 CrA qAB¸öšÔ,R  A‘\)=#×
+SMARTS 1.3-m       V394 CrA qAB¸÷Š	R  A‘¸=#×
+SMARTS 1.3-m       V394 CrA qAB¸øy=ÙR  A‘p¤=LÌÍSMARTS 1.3-m       V394 CrA qAB¸ùhr°R  A‘p¤=LÌÍSMARTS 1.3-m       V394 CrA qAB¸úW§‡R  A‘™š=£×
+SMARTS 1.3-m       V394 CrA qAB¸>}VmR  A“G®=¸QìSMARTS 1.3-m       V394 CrA qAB¸@oiDR  A“p¤=£×
+SMARTS 1.3-m       V394 CrA qAB¸A[W?R  A—G®>\)SMARTS 1.3-m       V394 CrA qAB¸BT`ªR  A”ÌÍ=áG®SMARTS 1.3-m       V394 CrA qAB¸fƒä&R  A‘\)=LÌÍSMARTS 1.3-m       V394 CrA qAB¸g|í‘R  A‘
+==uÂSMARTS 1.3-m       V394 CrA qAB¸Â¦L0R  A”(ö>€  SMARTS 1.3-m       V394 CrA qAB¸Yè>BR  A‘33=LÌÍSMARTS 1.3-m       V394 CrA qAB¸aûçmJ  A‹33=ÌÌÍSMARTS 1.3-m       V394 CrA qAB¸aÿ.IR  A•
+=<õÂSMARTS 1.3-m       V394 CrA qAB¸â)ÇzJ  A‰p¤=¸QìSMARTS 1.3-m       V394 CrA qAB¸â-VR  A“
+=<õÂSMARTS 1.3-m       V394 CrA qAB¸å„MR  A•33=LÌÍSMARTS 1.3-m       V394 CrA qAB¸"ÓÉîÌJ  A‹33=õÂSMARTS 1.3-m       V394 CrA qAB¸"ÓÉîÌR  A”{=LÌÍSMARTS 1.3-m       V394 CrA qAB¸$VÜ]dJ  A‹33=áG®SMARTS 1.3-m       V394 CrA qAB¸$VÜ]dR  A”{<õÂSMARTS 1.3-m       V394 CrA qAB¸%Ú…‡”R  A“¸<õÂSMARTS 1.3-m       V394 CrA qAB¸%Ú…‡”J  AŠÌÍ=õÂSMARTS 1.3-m       V394 CrA qAB¸(Þ»˜ÈR  A¸R<£×
+SMARTS 1.3-m       V394 CrA qAB¸/É^žR  AŽáH<õÂSMARTS 1.3-m       V394 CrA qAB¸0Ì`ªeR  A×
+<õÂSMARTS 1.3-m       V394 CrA qAB¸1H-àR  A‰×
+>\)SMARTS 1.3-m       V394 CrA qAB¸1Ç¾vÉR  A‰Â>\)SMARTS 1.3-m       V394 CrA qAB¸2Eã½R  AŒ(ö<£×
+SMARTS 1.3-m       V394 CrA qAB¸3E„MR  AÂ=LÌÍSMARTS 1.3-m       V394 CrA qAB¸3Àù	lR  A‹™š<£×
+SMARTS 1.3-m       V394 CrA qAB¸3Âe,R  A‹…<£×
+SMARTS 1.3-m       V394 CrA qAB¸3Ã6zR  A‹\)<£×
+SMARTS 1.3-m       V394 CrA qAB¸3Ä64R  A‹p¤<£×
+SMARTS 1.3-m       V394 CrA qAB¸3Å5¨XR  A‹\)<£×
+SMARTS 1.3-m       V394 CrA qAB¸3Æ5?}R  A‹p¤<£×
+SMARTS 1.3-m       V394 CrA qAB¸3Ø*™1R  A™š<õÂSMARTS 1.3-m       V394 CrA qAB¸3Ù*0UR  A®<õÂSMARTS 1.3-m       V394 CrA qAB¸3Ú)ÇzR  AQì<õÂSMARTS 1.3-m       V394 CrA qAB¸3ÛŽóMR  A‘G®=#×
+SMARTS 1.3-m       V394 CrA qAB¸4EÜÆ?R  AŒQì<£×
+SMARTS 1.3-m       V394 CrA qAB¸7Ä¥zxR  AŽÌÍ<£×
+SMARTS 1.3-m       V394 CrA qAB¸8Cˆe•R  A®<õÂSMARTS 1.3-m       V394 CrA qAB¸8Ø“t¼R  A{<õÂSMARTS 1.3-m       V394 CrA qAB¸9A°‰ R  AG®<õÂSMARTS 1.3-m       V394 CrA qAB¸9Ëˆe•R  AŽff<£×
+SMARTS 1.3-m       V394 CrA qAB¸:?Ë’:R  A×
+<£×
+SMARTS 1.3-m       V394 CrA qAB¸:B‚@¸R  AŽ  <£×
+SMARTS 1.3-m       V394 CrA qAB¸:DŽŠrR  AŽQì<£×
+SMARTS 1.3-m       V394 CrA qAB¸:F}VmR  AŽ\<£×
+SMARTS 1.3-m       V394 CrA qAB¸:HuöýR  AŽ¸R<£×
+SMARTS 1.3-m       V394 CrA qAB¸:J×sR  AŽQì<£×
+SMARTS 1.3-m       V394 CrA qAB¸:Ja|R  AŽõÃ<£×
+SMARTS 1.3-m       V394 CrA qAB¸:L¹#£R  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸:Ný!ÿR  A
+=<£×
+SMARTS 1.3-m       V394 CrA qAB¸:PFÜR  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸:Q¦µR  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸:R’£R  A…<£×
+SMARTS 1.3-m       V394 CrA qAB¸:S×ÜR  A…<£×
+SMARTS 1.3-m       V394 CrA qAB¸:TmÅÖR  A\)<£×
+SMARTS 1.3-m       V394 CrA qAB¸:UžƒäR  A\)<£×
+SMARTS 1.3-m       V394 CrA qAB¸:VŠqÞR  Ap¤<£×
+SMARTS 1.3-m       V394 CrA qAB¸:Wy¦µR  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸:XhÛŒR  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸:YTÉ†R  A¸<£×
+SMARTS 1.3-m       V394 CrA qAB¸:ZCþ]R  AŽõÃ<£×
+SMARTS 1.3-m       V394 CrA qAB¸:[/ìWR  AŽáH<õÂSMARTS 1.3-m       V394 CrA qAB¸:Óê³hR  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸;V4R  AŽ=q<£×
+SMARTS 1.3-m       V394 CrA qAB¸<RÚ¹õR  AŽ{=LÌÍSMARTS 1.3-m       V394 CrA qAB¸>GXâR  A(ö<õÂSMARTS 1.3-m       V394 CrA qAB¸?HëíúR  A’(ö<õÂSMARTS 1.3-m       V394 CrA qAB¸?¾$Ý/R  AŠ=q>8QìSMARTS 1.3-m       V394 CrA qAB¸@Ìo R  A“33=uÂSMARTS 1.3-m       V394 CrA qAB¸AN¾ß¤R  A…<£×
+SMARTS 1.3-m       V394 CrA qAB¸AÆö”FR  AÌÍ=#×
+SMARTS 1.3-m       V394 CrA qAB¸CR‚@¸R  A‘G®=#×
+SMARTS 1.3-m       V394 CrA qAB¸CÇ§†ÂR  A‘33>#×
+SMARTS 1.3-m       V394 CrA qAB¸DK=ÈR  A‘¸<£×
+SMARTS 1.3-m       V394 CrA qAB¸DÃœ¿R  AQì<£×
+SMARTS 1.3-m       V394 CrA qAB¸E¾YJõR  A’{=#×
+SMARTS 1.3-m       V394 CrA qAB¸F@†YKR  A‘33<£×
+SMARTS 1.3-m       V394 CrA qAB¸NÂˆÎpR  A’õÃ=£×
+SMARTS 1.3-m       V394 CrA qAB¸NÃt¼jR  A“p¤=\)SMARTS 1.3-m       V394 CrA qAB¸NÄ`ªeR  A“¸=uÂSMARTS 1.3-m       V394 CrA qAB¸NÅL˜_R  A“×
+=uÂSMARTS 1.3-m       V394 CrA qAB¸NÆ8†YR  A“®=uÂSMARTS 1.3-m       V394 CrA qAB¸NÇ$tTR  A“33=uÂSMARTS 1.3-m       V394 CrA qAB¸NÈbNR  A“ë…=uÂSMARTS 1.3-m       V394 CrA qAB¸NÈüPHR  A“®=uÂSMARTS 1.3-m       V394 CrA qAB¸NÉè>BR  A“p¤=uÂSMARTS 1.3-m       V394 CrA qAB¸NÊÔ,=R  A“p¤=\)SMARTS 1.3-m       V394 CrA qAB¸NËÐ|…R  A“G®=\)SMARTS 1.3-m       V394 CrA qAB¸NÌ¼jR  A“®=£×
+SMARTS 1.3-m       V394 CrA qAB¸NÍ¨XyR  A“G®=£×
+SMARTS 1.3-m       V394 CrA qAB¸NÎ”FtR  A”(ö=ÌÌÍSMARTS 1.3-m       V394 CrA qAB¸NÏ–¼R  A“33=ÌÌÍSMARTS 1.3-m       V394 CrA qAB¸•l2ÊXB  A‘®<£×
+SMARTS 1.3-m       V394 CrA qAB¸•m(V  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¸•m¨XyR  AŠ=q<£×
+SMARTS 1.3-m       V394 CrA qAB¸•n1ø¡I  A†£×<£×
+SMARTS 1.3-m       V394 CrA qAB¸›hoiDB  A˜£×<õÂSMARTS 1.3-m       V394 CrA qAB¸œîæ1ùB  A™G®<õÂSMARTS 1.3-m       V394 CrA qAB¸žëdZB  A™
+=<£×
+SMARTS 1.3-m       V394 CrA qAB¸ ì`ªeB  AG®>\)SMARTS 1.3-m       V394 CrA qAB¸¢i‚©“B  Aœ(ö<õÂSMARTS 1.3-m       V394 CrA qAB¸¤g_oÒB  AžáH=#×
+SMARTS 1.3-m       V394 CrA qAB¸¥ã{J#B  Ažff=uÂSMARTS 1.3-m       V394 CrA qAB¸§ã¹Œ~B  Až{=áG®SMARTS 1.3-m       V394 CrA qAB¸«æí)B  A›Â<õÂSMARTS 1.3-m       V394 CrA qAB¸²å²-B  AœÌÍ=#×
+SMARTS 1.3-m       V394 CrA qAB¸³hoiDB  A›×
+<õÂSMARTS 1.3-m       V394 CrA qAB¸¶Õéá±B  A33=£×
+SMARTS 1.3-m       V394 CrA qAB¸¸ãô‡ýB  Až¸R=#×
+SMARTS 1.3-m       V394 CrA qAB¸¼æ¾ß¤B  Aš  <õÂSMARTS 1.3-m       V394 CrA qAB¸ÇVšÔ,B  Ažff=LÌÍSMARTS 1.3-m       V394 CrA qAB¸ÇÖzáB  Aœff=#×
+SMARTS 1.3-m       V394 CrA qAB¸Èd,<ŸB  A =q=LÌÍSMARTS 1.3-m       V394 CrA qAB¸ÊS‹¬qB  AŸë…<õÂSMARTS 1.3-m       V394 CrA qAB¸ÑV¡aåB  Aœ\=õÂSMARTS 1.3-m       V394 CrA qAB¸ØÕ„MB  Ašff<õÂSMARTS 1.3-m       V394 CrA qAB¸ãB	ÞB  A’¸R<õÂSMARTS 1.3-m       V394 CrA qAB¸ãB•éâB  A’£×<õÂSMARTS 1.3-m       V394 CrA qAB¸ä¿E8ïB  A”õÃ<£×
+SMARTS 1.3-m       V394 CrA qAB¸ä¿ï²B  A”zá<£×
+SMARTS 1.3-m       V394 CrA qAB¸æ@K]ÌB  A•G®<õÂSMARTS 1.3-m       V394 CrA qAB¸æ@è§B  A”õÃ<õÂSMARTS 1.3-m       V394 CrA qAB¸éUcˆfB  A˜ff<õÂSMARTS 1.3-m       V394 CrA qAB¸êÅÈKB  A˜ff<õÂSMARTS 1.3-m       V394 CrA qAB¸êÅžƒäB  A˜ÌÍ<õÂSMARTS 1.3-m       V394 CrA qAB¸ìBa|B  A™…<õÂSMARTS 1.3-m       V394 CrA qAB¸ìBþÅmB  A™G®<õÂSMARTS 1.3-m       V394 CrA qAB¸ôEsê³B  A›™š=\)SMARTS 1.3-m       V394 CrA qAB¸ôEúCþB  A›Â=£×
+SMARTS 1.3-m       V394 CrA qAB¸÷EÂ\B  A›…<õÂSMARTS 1.3-m       V394 CrA qAB¸ùCa@B  A™G®<õÂSMARTS 1.3-m       V394 CrA qAB¸ùD"h
+B  A™
+=<õÂSMARTS 1.3-m       V394 CrA qAB¸ûBø7µB  A›®=LÌÍSMARTS 1.3-m       V394 CrA qAB¸ûC{J#B  A›ë…=LÌÍSMARTS 1.3-m       V394 CrA qAB¹ƒÝ2a|B  AG®<£×
+SMARTS 1.3-m       V394 CrA qAB¹…çKÆ¨B  Aš(ö=LÌÍSMARTS 1.3-m       V394 CrA qAB¹‡Z~ùÛB  A”=q=#×
+SMARTS 1.3-m       V394 CrA qAB¹‰Öz‘B  A“®<£×
+SMARTS 1.3-m       V394 CrA qAB¹‹àò{³B  A—™š<£×
+SMARTS 1.3-m       V394 CrA qAB¹VYJõB  A—G®<£×
+SMARTS 1.3-m       V394 CrA qAB¹ŽÛñA B  A˜\<£×
+SMARTS 1.3-m       V394 CrA qAB¹ÖËûB  Aœ(ö>™šSMARTS 1.3-m       V394 CrA qAB¹‘Ö¤¨ÁB  A›®=LÌÍSMARTS 1.3-m       V394 CrA qAB¹•SMjB  A×
+=LÌÍSMARTS 1.3-m       V394 CrA qAB¹–Oeý‹B  AœÌÍ<õÂSMARTS 1.3-m       V394 CrA qAB¹™_oÒ B  Aš=q=\)SMARTS 1.3-m       V394 CrA qAB¹œ\,<ŸB  A˜\<õÂSMARTS 1.3-m       V394 CrA qAB¹Ù*0UB  A™¸=#×
+SMARTS 1.3-m       V394 CrA qAB¹ŸS…¸B  A›33=#×
+SMARTS 1.3-m       V394 CrA qAB¹¥Q [ÀB  A›
+=<õÂSMARTS 1.3-m       V394 CrA qAB¹¨Mí(B  A˜ff<õÂSMARTS 1.3-m       V394 CrA qABºncŠR  A¸=#×
+SMARTS 1.3-m       V394 CrA qABºîcŠR  AŽQì<õÂSMARTS 1.3-m       V394 CrA qABºêW§‡R  AŽ¸R<õÂSMARTS 1.3-m       V394 CrA qABºðN¤©R  A\)<£×
+SMARTS 1.3-m       V394 CrA qABºñÿ.IR  Aë…<£×
+SMARTS 1.3-m       V394 CrA qABº	jkP±R  Azá<õÂSMARTS 1.3-m       V394 CrA qABº
+k~‘ R  AG®<õÂSMARTS 1.3-m       V394 CrA qABºjáG®R  A‘
+==#×
+SMARTS 1.3-m       V394 CrA qABºðï4×R  Azá<õÂSMARTS 1.3-m       V394 CrA qABºlðØER  A  <õÂSMARTS 1.3-m       V394 CrA qABºp4mÆR  AŽff<£×
+SMARTS 1.3-m       V394 CrA qABºîlôR  A™š<õÂSMARTS 1.3-m       V394 CrA qABº\q³R  AŽQì<£×
+SMARTS 1.3-m       V394 CrA qABº^šÔ,R  AŽzá<£×
+SMARTS 1.3-m       V394 CrA qABºéuŽ"R  AÂ<£×
+SMARTS 1.3-m       V394 CrA qABºæ_Ø®R  AŽ{<£×
+SMARTS 1.3-m       V394 CrA qABº`$xR  A™š=#×
+SMARTS 1.3-m       V394 CrA qABºdo R  A‘
+==#×
+SMARTS 1.3-m       V394 CrA qABºï;dZR  AŠ=q<£×
+SMARTS 1.3-m       V394 CrA qABºV¸QìR  Aˆff<£×
+SMARTS 1.3-m       V394 CrA qABº â×sR  A‰™š<£×
+SMARTS 1.3-m       V394 CrA qABº"_'»0R  AŠáH<£×
+SMARTS 1.3-m       V394 CrA qABº#ën˜R  AŠ=q<£×
+SMARTS 1.3-m       V394 CrA qABº$dÚQR  AŠ  <£×
+SMARTS 1.3-m       V394 CrA qABº$ämÅÖR  A‰ë…<£×
+SMARTS 1.3-m       V394 CrA qABº)æ4R  A
+=<£×
+SMARTS 1.3-m       V394 CrA qABº1R3œR  A™š<õÂSMARTS 1.3-m       V394 CrA qABº7jW§‡R  Aë…<õÂSMARTS 1.3-m       V394 CrA qABº9çö+kR  A‘\)=#×
+SMARTS 1.3-m       V394 CrA qABº<`1&éR  AG®<£×
+SMARTS 1.3-m                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

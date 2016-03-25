@@ -1,0 +1,21 @@
+# Predicted and observed time delays between the three
+# images of "SN" spock:
+# image 1 = spock1 event observed at NW position (galaxy 11.2) in January 2014
+# image 2 = spock2 event observed at SE position (galaxy 11.1) in August 2014
+# image 3 = expected spock 3  in putative 11.3
+# dt12 = delay time from image 1 (NW position) to image 2 (SE position) in days
+# dt13 = delay time from image 1 (NW) to image 3 (across the cluster) in years
+# 
+# MJDpk_1 = 56670  # observed date of peak for spock1 event at NW position
+# MJDpk_2 = 56908  # observed date of peak for spock2 event at SE position
+# 
+
+#           [days]                    [yrs]
+# model      dt12     dt12err          dt13    dt13err   mu1   mu1err+  mu1err-   mu2   mu2err+  mu2err-
+Diego       -47.45      10.0           0.79      0.0     35    20       20        30    20       20
+Jauzac_v1    22.9       10.0           5.67      0.0     --    --       --        --    --       --
+Jauzac_v2    22.9       10.0           3.32      0.0     --    --       --        --    --       --
+Williams    -22         10            -4.65      0.0	   28    82       15        20    41       13
+Zitrin      -20         10            10.0       4.0     --    --       --        --    --       --		
+observed     238        1.0            0.0       0.0     --    --       --        --    --       --
+

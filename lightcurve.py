@@ -19,7 +19,7 @@ __TEMPLATEDATAFILES__ = {
 
 
 def mk_composite_template( peakmag=26.5,
-        tempdatadir = '~/Dropbox/Papers/spock/data/RN_templates/'
+        tempdatadir = 'data/RN_templates/'
         ):
     """ read in all the galactic nova templates, normalize
     and create a composite template that is normalized to the
@@ -141,7 +141,12 @@ def get_spock_data():
     se = getdata('HST_FFSN_spockSE_phot.dat')
     return nw, se
 
-def getdata(datfilename, datadir="~/Dropbox/Papers/spock/data/"):
+def getdata(datfilename, datadir="./data"):
+    """  Find the given data file.
+    :param datfilename:
+    :param datadir:
+    :return:
+    """
 
     from os import path
     from astropy.io import ascii
@@ -152,8 +157,8 @@ def getdata(datfilename, datadir="~/Dropbox/Papers/spock/data/"):
     filedir = path.dirname(__file__)
     filedir = path.abspath(path.expanduser(filedir))
     userdatadir = path.abspath(path.expanduser(datadir))
-    sysdatadir = path.abspath(path.join(sysdir,'/../data/'))
-    filedatadir = path.abspath(path.join(filedir,'/../data/'))
+    sysdatadir = path.abspath(path.join(sysdir,'data/'))
+    filedatadir = path.abspath(path.join(filedir,'data/'))
 
     for dir in [userdatadir, sysdatadir, filedatadir]:
         datfile = path.join(dir, datfilename)
@@ -221,7 +226,7 @@ def plot_lightcurve(src='se', aperture=np.inf,
                         marker=' ', color=c, ls=' ', alpha=0.5,
                         label='__nolabel__', lolims=True)
     if showtemplates:
-        tempdatadir = '~/Dropbox/Papers/spock/data/RN_templates/'
+        tempdatadir = './data/RN_templates/'
         m31n2008a12 = __TEMPLATEDATAFILES__['M31N 2008-12a (2014)']
         tempdata = getdata(m31n2008a12, tempdatadir)
         for band, c, ls in zip(['V'],['k'],['-','--']):

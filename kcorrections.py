@@ -1,14 +1,10 @@
-from constants import __MJDPKNW__, __MJDPKSE__, __Z__
-from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
-from constants import __MJDPREPK0SE__, __MJDPOSTPK0SE__
-from . import lightcurve
+from constants import __Z__, __RESTBANDNAME__
 from scipy import interpolate as scint
 from scipy import integrate as scintegrate
 import numpy as np
-from matplotlib import pyplot as pl
-from pytools import plotsetup
 from astropy.io import ascii
 import sncosmo
+
 
 
 def compute_kcorrections():
@@ -23,8 +19,6 @@ def compute_kcorrections():
 
     # manually identified the rest-frame band that most closely matches each
     # obs-frame filter.
-    restbandname = {'f435w':'bessellux','f814w':'bessellb',
-                'f125w':'sdssr', 'f160w':'sdssi'}
     for event in ['nw','se']:
         # get a list of the observed bandpasses for this event
         ievent = np.where(indat['event'] == event)[0]
@@ -36,7 +30,7 @@ def compute_kcorrections():
             [(obsbandname, sncosmo.get_bandpass(obsbandname))
              for obsbandname in np.unique(indat['band'])])
         restbandpassdict = dict(
-            [(obsbandname,sncosmo.get_bandpass(restbandname[obsbandname]))
+            [(obsbandname,sncosmo.get_bandpass(__RESTBANDNAME__[obsbandname]))
              for obsbandname in np.unique(indat['band'])])
 
         # fill in the dictionaries with the bandpass transmission functions
@@ -119,7 +113,7 @@ def compute_kcorrections():
                     (obs_source_integrated * rest_band_integrated) /
                     (obs_band_integrated * rest_source_integrated))
 
-                print >> fout, "%s  %s  %s  %.3e  %.3f" % (
-                    event, obsbandname, restbandname[obsbandname],
+                print >> fout, "%s  %s  %s  %.3f  %.3f " % (
+                    event, obsbandname, __RESTBANDNAME__[obsbandname],
                     dtpk, kcorval)
     fout.close()

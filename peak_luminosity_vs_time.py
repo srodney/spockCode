@@ -1,12 +1,15 @@
 from constants import __MJDPKNW__, __MJDPKSE__, __Z__
 from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
 from constants import __MJDPREPK0SE__, __MJDPOSTPK0SE__
+from constants import __RESTBANDNAME__, __H0__ , __OM__
+
+
 from . import lightcurve
 from scipy import interpolate as scint
 from scipy import optimize as scopt
 import numpy as np
 from matplotlib import pyplot as pl
-from pytools import plotsetup
+from pytools import plotsetup, cosmo
 from astropy.io import ascii
 import sncosmo
 
@@ -18,8 +21,13 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
     assert figsize in ['wide','tall']
     if figsize=='wide':
         fig = plotsetup.fullpaperfig(figsize=[8,3])
+        fig.subplots_adjust(left=0.1, bottom=0.1, hspace=0.15,
+                            right=0.95, top=0.95)
     else:
-        fig = plotsetup.halfpaperfig()
+        fig = plotsetup.halfpaperfig(figsize=[3.5,6])
+        fig.subplots_adjust(left=0.17, bottom=0.1, hspace=0.15,
+                            right=0.97, top=0.97)
+
     fig.clf()
     def line(x, slope, zpt):
         return slope*x + zpt
@@ -122,7 +130,7 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
             ax.set_ylim(30.2, 24.5)
             ax.text(0.95,0.9, 'NW', ha='right', va='top',
                     transform=ax.transAxes, fontsize='large')
-            ax.legend(loc='upper left', fontsize='small')
+            ax.legend(loc='upper left', fontsize='small', frameon=False)
             ax.set_ylabel('Observed AB magnitude')
         else:
             ax.set_xlim(-3.9, 8.9)
@@ -142,9 +150,58 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
                     transform=ax.transAxes,
                     ha='left', va='center', color='darkred')
 
-    fig.subplots_adjust(left=0.1, bottom=0.1, hspace=0.15,
-                        right=0.95, top=0.95)
     fout.close()
     return
 
 
+def peak_luminosity_vs_time(mumin=10,mumax=50):
+    """ Read in the data file giving apparent magnitude vs time inferred from
+    the linear fits to four observed bands.  Read in the data file giving the
+    K correction as a function of time for converting each observed HST band
+    into the nearest rest-frame filter.  For each assumed time of peak,
+    convert the extrapolated apparent mag at peak to the peak absolute
+    magnitude.  Then convert this absolute magnitude to Luminosity in erg/s
+
+    :return:
+    """
+    fig = plotsetup.halfpaperfig(figsize=[3.5,3.5])
+    ax1 = fig.add_subplot(1,2,1)
+    ax2 = fig.add_subplot(1,2,2, sharey=ax1)
+    magdatfile = 'data/magpk_trise_tfall_kcor_vs_time.dat'
+    indat = ascii.read(magdatfile, format='commented_header',
+                        header_start=-1, data_start=0)
+
+    # constant combining the speed of light with the standard
+    # luminosity factor to convert from AB mags to Luminosity in erg/s
+    cL0 = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
+
+
+    distmod = cosmo.mu(__Z__, H0=__H0__, Om=__OM__, Ode=1-__OM__)
+
+    MABmin = indat['mpk'] - distmod - indat['kcor'] + 2.5 * np.log10(mumax)
+    MABmax = indat['mpk'] - distmod - indat['kcor'] + 2.5 * np.log10(mumin)
+
+    obsbandlist = np.unique(indat['obsband'])
+    for obsbandname, label, c, m in zip(['f435w', 'f814w', 'f125w', 'f160w'],
+                                        ['UV','B','r','i'],
+                                        ['c', 'darkgreen','r','darkred'],
+                                        ['o','o', 's','s']):
+        restbandname = __RESTBANDNAME__[obsbandname.lower()]
+        restband = sncosmo.get_bandpass(restbandname)
+        wave_eff = restband.wave_eff
+        iband = np.where(indat['obsband']==obsbandname)[0]
+
+        # computing log10(L) with luminosity in erg / s :
+        logLmin = np.log10(cL0 / wave_eff) + 40 - (0.4 * MABmin[iband])
+        logLmax = np.log10(cL0 / wave_eff) + 40 - (0.4 * MABmax[iband])
+
+        ax1.fill_between(indat['trise'][iband], logLmin, logLmax,
+                         color=c, alpha=0.3, label=label)
+        ax2.fill_between(indat['t3'][iband], logLmin, logLmax,
+                         color=c, alpha=0.3, label=label)
+
+    ax = pl.gca()
+    ax1.set_xlabel('rise time')
+    ax1.set_ylabel('log(L [erg/s])')
+    ax2.set_xlabel('rise time')
+    fig.subplots_adjust(left=0.13, right=0.97, bottom=0.1, top=0.97, wspace=0)

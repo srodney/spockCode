@@ -15,3 +15,6 @@ __OM__ = 0.3
 
 cosmo = cosmology.FlatLambdaCDM( name="WMAP9", H0=__H0__, Om0=__OM__ )
 __DM__ = cosmo.distmod( __Z__ ).value
+
+__RESTBANDNAME__ = {'f435w':'bessellux','f814w':'bessellb',
+                    'f125w':'sdssr', 'f160w':'sdssi'}

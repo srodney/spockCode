@@ -16,7 +16,9 @@ import sncosmo
 def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
                             figsize='tall'):
     """ Fit the rise and decline of the light curve with
-     a straight line in mag vs time.
+     a straight line in mag vs time.  Measure the rise time and decline time
+     for each event in the given bands, for a range of assumed dates of peak
+     brightness.
     """
     assert figsize in ['wide','tall']
     if figsize=='wide':
@@ -35,7 +37,7 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
 
     fout = open('data/magpk_trise_tfall.dat','w')
     print >> fout, "# event band deltatpk   mpk  fnupk  trise  t3"
-    for event in ['se','nw']:
+    for event in ['nw','se']:
         if event.lower()=='se':
             sn = se
             mjdpkobs = __MJDPKSE__
@@ -102,25 +104,27 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
             ax.plot(tplotrise, magrise, marker=' ', ls=ls, color=color)
 
             # plot decline-time linear fits
-            mag0 = riseslope * tprepk0 + risezpt # "0-flux" magnitude
+            # We arbitrarily set the "0-flux" magnitude to 30
+            # mag0 = riseslope * tprepk0 + risezpt  # alternative definition
             mag0 = 30
             for deltatpk in np.arange(0,tpostpk0,0.1):
                 magpk = riseslope * deltatpk + risezpt
                 declineslope = (mag0 - magpk) / (tpostpk0-deltatpk)
                 declinezpt = magpk - declineslope * deltatpk
-                tplotdecline = np.array([deltatpk, tpostpk0])
-                magdecline = declineslope * tplotdecline + declinezpt
                 m3 = magpk + 3
-                t3 = min(tpostpk0,(magpk + 3 - declinezpt)/declineslope)
+                t3 = min((tpostpk0 - deltatpk),
+                         ((m3 - declinezpt) / declineslope) - deltatpk)
                 trise = deltatpk - tprepk0
                 fnu_uJy = 10**((23.9-magpk)/2.5) # flux density in microJanskys
                 print >> fout,  "%s  %s  %5.2f  %5.2f  %7.4f  %5.3f  %5.3f" % (
                     event, band, deltatpk, magpk, fnu_uJy, trise, t3)
                 if (deltatpk ==0 or np.abs(deltatpk-(tpostpk0-0.5))<=0.05 or
                     np.abs(deltatpk-(tpostpk0/2.))<=0.05):
-                    ax.plot(tplotdecline, magdecline, marker=' ', ls=ls,
+                    tplotdecline = np.array([deltatpk, tpostpk0])
+                    mplotdecline = declineslope * tplotdecline + declinezpt
+                    ax.plot(tplotdecline, mplotdecline, marker=' ', ls=ls,
                              color=color)
-                    ax.plot(t3, m3, marker='o', mfc='w',mec=color, ms=8,
+                    ax.plot(t3+deltatpk, m3, marker='o', mfc='w',mec=color, ms=8,
                             mew=1.5)
                     ax.plot(deltatpk, magpk, marker='d', mfc='w',mec=color,
                             ms=8, mew=1.5)
@@ -200,8 +204,13 @@ def peak_luminosity_vs_time(mumin=10,mumax=50):
         ax2.fill_between(indat['t3'][iband], logLmin, logLmax,
                          color=c, alpha=0.3, label=label)
 
+        #ax2.plot(indat['t3'][iband], logLmin, marker=' ', ls='-',
+        #         color=c, alpha=0.3, label=label)
+        #ax2.plot(indat['t3'][iband], logLmax, marker=' ', ls='-',
+        #         color=c, alpha=0.3, label=label)
+
     ax = pl.gca()
     ax1.set_xlabel('rise time')
     ax1.set_ylabel('log(L [erg/s])')
-    ax2.set_xlabel('rise time')
+    ax2.set_xlabel('t$_{3}$ decline time')
     fig.subplots_adjust(left=0.13, right=0.97, bottom=0.1, top=0.97, wspace=0)

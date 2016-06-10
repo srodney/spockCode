@@ -1,4 +1,6 @@
+from __future__ import print_function
 from constants import __Z__, __RESTBANDNAME__
+
 from scipy import interpolate as scint
 from scipy import integrate as scintegrate
 import numpy as np
@@ -12,8 +14,9 @@ def compute_kcorrections():
     indatfile = 'data/magpk_trise_tfall.dat'
     indat = ascii.read(indatfile, format='commented_header', header_start=-1,
                      data_start=0)
-    fout = open('data/kcor_vs_time.dat', 'w')
-    print >> fout, '# event  obsband  restband   deltatrest   kcor'
+    fout = open('data/magpk_trise_tfall_kcor.dat', 'w')
+    print('# event obsband deltatpk mpk fnupk trise t2 t3 restband kcor',
+          file=fout)
 
     absys = sncosmo.get_magsystem('ab')
 
@@ -52,7 +55,8 @@ def compute_kcorrections():
         Note: We are working with fnu in wavelength space, but this is
         ok b/c the factors of c/wave^2 that translate fnu to flambda are
         handled in the definitions of the K-corr integrands below. """
-        for dtpk in np.unique(indat['deltatpk'][ievent]):
+        dtpklist = list(np.unique(indat['deltatpk'][ievent]))
+        for dtpk in dtpklist:
             # First, collect fnu and central wavelength values for each band
             fnulist = []
             wavelist = []
@@ -81,11 +85,19 @@ def compute_kcorrections():
                                    fill_value=fnulist[np.argmin(wavelist)]
                                    )(w)))
 
-            # define the K correction integrands (following Hogg on NED)
-            # and integrate them numerically
             for obsbandname in obsbandnamelist:
+                irow = np.where((indat['event'] == event) &
+                                (indat['deltatpk'] == dtpk) &
+                                (indat['band'] == obsbandname))[0]
+                row = indat[irow]
+                # define the K correction integrands (following Hogg on NED)
+                # and integrate them numerically
                 obsbandpass = obsbandpassdict[obsbandname]
                 obsbandtrans = obsbandtransdict[obsbandname]
+                restbandname = __RESTBANDNAME__[obsbandname]
+                restbandpass = restbandpassdict[obsbandname]
+                restbandtrans = restbandtransdict[obsbandname]
+
                 def obs_source_integrand(w):
                     return (fnuinterp(w)/w) * obsbandtrans(w)
                 obs_source_integrated = scintegrate.trapz(
@@ -93,15 +105,11 @@ def compute_kcorrections():
                 def obs_band_integrand(w):
                     return (1/w) * obsbandtrans(w)
                 obs_band_integrated = scintegrate.trapz(
-                        obs_band_integrand(obsbandpass.wave), obsbandpass.wave)
-
-                restbandpass = restbandpassdict[obsbandname]
-                restbandtrans = restbandtransdict[obsbandname]
+                    obs_band_integrand(obsbandpass.wave), obsbandpass.wave)
                 def rest_band_integrand(w):
                     return (1/w) * restbandtrans(w)
                 rest_band_integrated = scintegrate.trapz(
-                    rest_band_integrand(restbandpass.wave),
-                    restbandpass.wave)
+                    rest_band_integrand(restbandpass.wave), restbandpass.wave)
                 def rest_source_integrand(w):
                     return (fnuinterp((1+__Z__)*w)/w) * restbandtrans(w)
                 rest_source_integrated = scintegrate.trapz(
@@ -109,11 +117,11 @@ def compute_kcorrections():
                     restbandpass.wave)
 
                 kcorval = -2.5 * np.log10(
-                    (1 + __Z__) *
-                    (obs_source_integrated * rest_band_integrated) /
-                    (obs_band_integrated * rest_source_integrated))
+                        (1 + __Z__) *
+                        (obs_source_integrated * rest_band_integrated) /
+                        (obs_band_integrated * rest_source_integrated))
 
-                print >> fout, "%s  %s  %s  %.3f  %.3f " % (
-                    event, obsbandname, __RESTBANDNAME__[obsbandname],
-                    dtpk, kcorval)
+                rowstr = str(row).split('\n')[-1]
+                print("%s  %15s  %.3f " % ( rowstr, restbandname, kcorval ),
+                      file=fout)
     fout.close()

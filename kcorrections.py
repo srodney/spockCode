@@ -11,10 +11,10 @@ import sncosmo
 
 def compute_kcorrections():
     # read in the data file produced by linear fits to the pre-peak data
-    indatfile = 'data/magpk_trise_tfall.dat'
+    indatfile = 'data/magpk_trise_tfall.data'
     indat = ascii.read(indatfile, format='commented_header', header_start=-1,
                      data_start=0)
-    fout = open('data/magpk_trise_tfall_kcor.dat', 'w')
+    fout = open('data/magpk_trise_tfall_kcor.data', 'w')
     print('# event obsband deltatpk mpk fnupk trise t2 t3 restband kcor',
           file=fout)
 

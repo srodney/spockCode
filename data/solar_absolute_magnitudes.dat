@@ -1,0 +1,111 @@
+#  Absolute Magnitude of the sun in various bands
+# 
+#  From Chris Willmer, Steward Observatory
+#  http://mips.as.arizona.edu/~cnaw/sun.html
+# 
+# These calculations used the solar spectrum available at the CALSPEC
+# database at STScI, and the STIS spectrum of Vega combined with the
+# Model Atmosphere of Vega calculated by Kurucz, as described by Bohlin
+# and Gilliland 2004 .  The procedure used here followed very closely
+# Fukugita, Shimasaku and Ichikawa, 1995, PASP, 105, 945 using filter
+# curves coming from a variety of sources, many of them referenced in
+# that work.
+#
+# The SDSS filters shown here come from two different sources. The
+# "primed" system is that used by the USNO 40-in Photometric
+# Telescope. However, the 2.5 telescope (which is the Survey instrument)
+# has slightly different bandpasses, which are represented as the
+# unprimed system. (Further information about this can be seen at the
+# SDSS flux calibration page. Because of the emphasis in galaxy work,
+# the unprimed filters were further shifted to z=0.1 to compare with the
+# Solar absolute magnitudes used by Blanton et al. 2003, ApJ, 592,
+# 819. There is a systematic difference of about 0.1 magnitudes between
+# Blanton et al. and here.
+# 
+# The filter set labeled simply u,g,r,i,z corresponds to the standard
+# 'primed' system from SDSS.
+# 
+#filter  Vega  AB Apparent AB_mag_of_Vega
+U  5.59  6.32  -25.99   0.734
+B  5.45  5.36  -26.13   -0.098
+V  4.78  4.79  -26.80   0.011
+R  4.46  4.65  -27.12   0.193
+I  4.11  4.55  -27.47   0.443
+F300W 6.09  7.52  -25.50   1.435
+F450W 5.32  5.25  -26.26   -0.071
+F555W 4.85  4.85  -26.74   -0.001
+F606W 4.66  4.75  -26.92   0.096
+F702W 4.32  4.58  -27.26   0.263
+F814W 4.15  4.57  -27.43   0.417
+U_CFHT   5.57  6.38  -26.01   0.809
+B_CFHT   5.49  5.32  -26.09   -0.170
+V_CFHT   4.81  4.81  -26.77   0.000
+R_CFHT   4.44  4.64  -27.14   0.199
+I_CFHT   4.06  4.54  -27.52   0.480
+U_KPNO   5.59  6.32  -25.99   0.729
+B_KPNO   5.49  5.43  -26.09   -0.059
+V_KPNO   4.79  4.79  -26.79   0.008
+R_KPNO   4.47  4.66  -27.11   0.185
+I_KPNO   4.11  4.55  -27.47   0.439
+U_Kron   5.58  6.29  -26.00   0.714
+J_Kron   5.31  5.26  -26.27   -0.047
+F_Kron   4.58  4.69  -27.01   0.117
+N_Kron   4.11  4.53  -27.47   0.421
+u  5.46  6.45  -26.12   0.995
+g  5.22  5.14  -26.36   -0.087
+r  4.50  4.65  -27.08   0.147
+i  4.16  4.54  -27.42   0.376
+z  4.01  4.52  -27.58   0.518
+u_prime_SDSS   5.46  6.45  -26.12   0.995
+g_prime_SDSS   5.22  5.14  -26.36   -0.087
+r_prime_SDSS   4.50  4.65  -27.08   0.147
+i_prime_SDSS   4.16  4.54  -27.42   0.376
+z_prime_SDSS   4.01  4.52  -27.58   0.518
+u_SDSS_z=0.1   5.83  6.77  -25.75   0.938
+g_SDSS_z=0.1   5.46  5.36  -26.12   -0.091
+r_SDSS_z=0.1   4.53  4.67  -27.05   0.144
+i_SDSS_z=0.1   4.12  4.48  -27.46   0.362
+z_SDSS_z=0.1   3.90  4.42  -27.68   0.520
+z_ACS_old   3.99  4.52  -27.59   0.530
+FIS555   4.84  4.84  -26.74   0.002
+FIS606   4.63  4.72  -26.96   0.096
+FIS702   4.32  4.59  -27.26   0.261
+FIS814   4.12  4.53  -27.47   0.417
+B_LRIS   5.46  5.42  -26.12   -0.043
+V_LRIS   4.82  4.83  -26.76   0.005
+R_LRIS   4.46  4.63  -27.12   0.174
+Rs_LRIS  4.33  4.59  -27.25   0.256
+I_LRIS   4.04  4.53  -27.54   0.484
+Z_LRIS   4.00  4.52  -27.58   0.520
+Un_SPH   5.43  6.49  -26.15   1.063
+G_SPH    5.21  5.11  -26.37   -0.098
+Rs_SPH   4.39  4.61  -27.19   0.173
+B_12k    5.45  5.34  -26.13   -0.111
+R_12k    4.39  4.60  -27.20   0.218
+I_12k    4.10  4.53  -27.49   0.435
+V_12k    4.85  4.85  -26.73   -0.001
+i_uh8K   4.06  4.53  -27.52   0.461
+F435W    5.49  5.40  -26.09   -0.083
+F606W    4.67  4.75  -26.91   0.080
+F775W    4.14  4.54  -27.44   0.393
+F814W    4.11  4.53  -27.47   0.424
+F850LP   4.00  4.52  -27.58   0.522
+U_Bessell   5.55  6.36  -26.03   0.807
+B_Bessell   5.45  5.36  -26.13   -0.096
+V_Bessell   4.80  4.82  -26.78   0.012
+J_Bessell   3.67  4.57  -27.91   0.897
+H_Bessell   3.33  4.71  -28.25   1.379
+K_Bessell   3.29  5.19  -28.29   1.882
+J_KPNO   3.66  4.57  -27.92   0.905
+H_KPNO   3.33  4.71  -28.26   1.387
+K_KPNO   3.29  5.18  -28.29   1.891
+2500  7.96  9.80  -23.62   1.841
+2800  6.67  8.23  -24.91   1.557
+Bj_APM   5.29  5.21  -26.29   -0.073
+UV_FOCA  10.50 12.39 -21.08   1.893
+R_DEIMOS    4.44  4.62  -27.14   0.186
+FUV_Galex   13.97 16.42 -17.61   2.457
+NUV_Galex   8.45  10.31 -23.13   1.863
+J_NIRI   3.64  4.57  -27.94   0.927
+H_NIRI   3.33  4.71  -28.25   1.380
+K_NIRI   3.29  5.18  -28.29   1.890

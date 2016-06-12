@@ -13,6 +13,14 @@ from pytools import plotsetup, cosmo
 from astropy.io import ascii
 import sncosmo
 
+import sys
+import os
+
+__THISFILE__ = sys.argv[0]
+if 'ipython' in __THISFILE__:
+    __THISFILE__ = __file__
+__THISDIR__ = os.path.abspath(os.path.dirname(__THISFILE__))
+
 def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
                             figsize='tall'):
     """ Fit the rise and decline of the light curve with
@@ -35,7 +43,8 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
         return slope*x + zpt
     nw, se = lightcurve.get_spock_data()
 
-    fout = open('data/magpk_trise_tfall.dat','w')
+    outfilename = os.path.join(__THISDIR__, 'data/magpk_trise_tfall.dat')
+    fout = open(outfilename,'w')
     print("# event band deltatpk   mpk  fnupk  trise  t2   t3", file=fout)
     for event in ['nw','se']:
         if event.lower()=='se':
@@ -164,6 +173,43 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
     fout.close()
     return
 
+def plot_ps1_fast_transients(
+        ax1, ax2,
+        datfile=os.path.join(__THISDIR__,'data/drout2014_table4.dat')):
+    """ plot the fast transients from Drout et al. 2014"""
+    indat = ascii.read(datfile, format='commented_header',
+                       header_start=-1, data_start=0)
+    trise = (indat['t_rise_max'] + indat['t_rise_min'])/2.
+    err_trise = indat['t_rise_max'] - trise
+
+    t3 = 1.874 * indat['t_decline']
+    err_t3 = indat['err_t_decline']
+    M = indat['Mrest']
+    fpk = 10**(-0.4*(M-25))
+
+    # f_at_t3 = fpk * 0.0631  # Flux after it has declined by 3 mags
+
+    # MWD  TWD logMdot vmax vavg L4max A t3bol tml Prec
+
+    # constant combining the speed of light with the standard
+    # luminosity factor to convert from AB mags to Luminosity in erg/s
+    cL0 = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
+
+    for bandname, color in zip(['g','r','i','z'],
+                               ['g', 'darkorange', 'darkred', 'k']):
+        band = sncosmo.get_bandpass('sdss'+bandname)
+        wave_eff = band.wave_eff
+        iband = np.where(indat['Band']==bandname)[0]
+        logL = np.log10(cL0 / wave_eff) + 40 - (0.4 * M[iband])
+        err_logL = 0.4 * indat['err_Mrest'][iband]
+        ax1.errorbar(trise[iband], logL, yerr=err_logL,
+                     xerr=err_trise[iband],
+                     color=color, ls=' ', marker='o')
+        ax2.errorbar(t3[iband], logL, yerr=err_logL,
+                     xerr=err_t3[iband],
+                     color=color, ls=' ', marker='o')
+
+
 def plot_known_novae():
 
     # M31N200812a
@@ -207,8 +253,8 @@ def plot_known_novae():
     logLR = np.log10(cL0 / wave_eff) + 40 - (0.4 * MR)
     pl.plot(t3R, logLR, marker='D', color='darkorange', ms=12)
 
-
-    indat = ascii.read("data/downes2000_table5.dat",
+    downesdatfile = os.path.join(__THISDIR__,"data/downes2000_table5.dat")
+    indat = ascii.read(downesdatfile,
                        format='commented_header', header_start=-1,
                        data_start=0)
     t3 = indat['t3']
@@ -220,7 +266,8 @@ def plot_known_novae():
     pl.errorbar( t3, logLV, logLVerr, marker='*', color='b', ls=' ')
 
 
-def plot_yaron2005_models(datfile='data/yaron2005_table3.dat'):
+def plot_yaron2005_models(
+        datfile=os.path.join(__THISDIR__,'data/yaron2005_table3.dat')):
     """  plot the peak luminosity vs decline time from Yaron et al 2005
     :param datfile:
     :return:
@@ -285,7 +332,7 @@ def plot_mmrd():
     pl.fill_between( t3, logLmax, logLmin, color='k', alpha=0.3)
 
 
-def peak_luminosity_vs_time(mumin=10,mumax=50):
+def peak_luminosity_vs_time(mumin=10,mumax=100):
     """ Read in the data file giving apparent magnitude vs time inferred from
     the linear fits to four observed bands.  Read in the data file giving the
     K correction as a function of time for converting each observed HST band
@@ -299,7 +346,7 @@ def peak_luminosity_vs_time(mumin=10,mumax=50):
     fig.clf()
     ax1 = fig.add_subplot(1,2,1)
     ax2 = fig.add_subplot(1,2,2, sharey=ax1)
-    magdatfile = 'data/magpk_trise_tfall_kcor.dat'
+    magdatfile = os.path.join(__THISDIR__,'data/magpk_trise_tfall_kcor.dat')
     indat = ascii.read(magdatfile, format='commented_header',
                         header_start=-1, data_start=0)
 
@@ -338,13 +385,17 @@ def peak_luminosity_vs_time(mumin=10,mumax=50):
         #         color=c, alpha=0.3, label=label)
 
     ax = pl.gca()
-    ax1.set_xlabel('rise time (days)')
+    ax1.set_xlabel('maximum rise time from 0 flux to peak (days)')
     ax1.set_ylabel('log(L [erg/s])')
-    ax2.set_xlabel('t$_{3}$ decline time (days)')
+    ax2.set_xlabel('t$_{3}$: maximum time to decline by 3 mag (days)')
     fig.subplots_adjust(left=0.13, right=0.97, bottom=0.1, top=0.97, wspace=0)
+
     plot_mmrd()
     plot_yaron2005_models()
     plot_known_novae()
+    plot_ps1_fast_transients(ax1, ax2)
+
+    ax1.set_xlim(0,12)
     ax2.set_xlim(0,12)
     # ax2.semilogx()
     fig = pl.gcf()

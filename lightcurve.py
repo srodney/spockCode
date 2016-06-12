@@ -498,19 +498,7 @@ def mk_prediction_fig(presfig=False):
     ytextHigh = ymin + (ymax - ymin) * 0.9
     ytextMid = ymin + (ymax - ymin) * 0.7
 
-    ax1.text(56905, ytextHigh,
-             '\\raggedleft \\noindent Predicted appearance\n'
-             'of Spock-2 event at \n the NW position',
-             ha='right', va='top', color='darkred')
-    ax1.annotate('\\noindent Spock-1\\\\ event',
-                 xy=(56680, yevent), xytext=(56700, ytextMid),
-                 ha='left', va='top', color='darkblue',
-                 arrowprops=dict(color='darkblue', width=0.5, headwidth=3.5,
-                                 shrink=0))
-
-
-
-    ax2.text(56675, ytextHigh,
+    ax2.text(56726, ytextHigh,
              '\\noindent Predicted appearance\\\\of Spock-1 event at\\\\'
              'the SE position',
              ha='left', va='top', color='darkblue')
@@ -518,6 +506,16 @@ def mk_prediction_fig(presfig=False):
                  xy=(56890, yevent), xytext=(56870, ytextMid),
                  ha='right', va='top', color='darkred',
                  arrowprops=dict(color='darkred', width=0.5, headwidth=3.5,
+                             shrink=0))
+
+    ax1.text(56850, ytextHigh,
+             '\\raggedleft \\noindent Predicted appearance\n'
+             'of Spock-2 event at \n the NW position',
+             ha='right', va='top', color='darkred')
+    ax1.annotate('\\noindent Spock-1\\\\ event',
+                 xy=(56680, yevent), xytext=(56700, ytextMid),
+                 ha='left', va='top', color='darkblue',
+                 arrowprops=dict(color='darkblue', width=0.5, headwidth=3.5,
                                  shrink=0))
 
     ax2.xaxis.set_major_locator(ticker.MultipleLocator(50))

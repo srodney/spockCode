@@ -164,8 +164,8 @@ def plot_colorcurve_binned( binsize=0.5 ):
 
     sncosmo.plotting._cmap_wavelims = (4350, 15300)
     # read in the data
-    nw = ascii.read('data/HST_FFSN_spockNW_phot.dat', format='commented_header',header_start=-1, data_start=0 )
-    se = ascii.read('data/HST_FFSN_spockSE_phot.dat', format='commented_header',header_start=-1, data_start=0 )
+    nw = ascii.read('data/HST_FFSN_spockNW_phot.data', format='commented_header',header_start=-1, data_start=0 )
+    se = ascii.read('data/HST_FFSN_spockSE_phot.data', format='commented_header',header_start=-1, data_start=0 )
 
     colorcurvedict = {
         'mjd':[],'mjderr':[],'colorname':[],'color':[],'colorerr':[] }
@@ -248,7 +248,7 @@ def plot_colorcurve_binned( binsize=0.5 ):
         ax.xaxis.set_minor_locator( ticker.MultipleLocator( 0.2 ) )
 
 
-    colortable.write( 'spock_colors.dat', format='ascii.fixed_width' )
+    colortable.write( 'spock_colors.data', format='ascii.fixed_width' )
     pl.draw()
     return( colortable )
 
@@ -265,8 +265,8 @@ def plot_colorcurve_movingbin( binsize=0.5 ):
 
     sncosmo.plotting._cmap_wavelims = (4350, 15300)
     # read in the data
-    nw = ascii.read('data/HST_FFSN_spockNW_phot.dat', format='commented_header',header_start=-1, data_start=0 )
-    se = ascii.read('data/HST_FFSN_spockSE_phot.dat', format='commented_header',header_start=-1, data_start=0 )
+    nw = ascii.read('data/HST_FFSN_spockNW_phot.data', format='commented_header',header_start=-1, data_start=0 )
+    se = ascii.read('data/HST_FFSN_spockSE_phot.data', format='commented_header',header_start=-1, data_start=0 )
 
     colorcurvedict = {
         'mjd':[],'mjderr':[],'colorname':[],'color':[],'colorerr':[] }
@@ -362,7 +362,7 @@ def plot_colorcurve_movingbin( binsize=0.5 ):
         ax.xaxis.set_minor_locator( ticker.MultipleLocator( 0.2 ) )
 
 
-    colortable.write( 'spock_colors.dat', format='ascii.fixed_width' )
+    colortable.write( 'spock_colors.data', format='ascii.fixed_width' )
     pl.draw()
     return( colortable )
 

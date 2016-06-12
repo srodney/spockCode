@@ -1,0 +1,42 @@
+# Table 4
+# Measured Photometric Properties (Gold and Silver Samples
+# t_decline gives the time above half max on the decline side
+#  (needs to be converted to t_3 using Mrest and assuming a linear decline)
+# Event     Band  Mrest err_Mrest  t_rise_min  t_rise_max      t_decline  err_t_decline
+PS1-10ah    g    -17.5  0.05         1         3             6.3     0.6   
+PS1-10ah    r    -17.2  0.04         1         3             7.4     0.8   
+PS1-10ah    i    -17.0  0.05         1         3             10.6    1.0  
+PS1-10ah    z    -16.8  0.04         1         3             5.7     0.7   
+PS1-10bjp   g    -18.2  0.02         1         4             7.7     0.6   
+PS1-10bjp   r    -18.0  0.03         3         5             6.0     0.4   
+PS1-10bjp   i    -17.8  0.01         3         6             10.0    0.5  
+PS1-10bjp   z    -17.6  0.03         2         6             11.1    0.7  
+PS1-11qr    g    -19.5  0.03         2         5             6.0     0.5   
+PS1-11qr    r    -19.3  0.06         2         5             8.7     0.4   
+PS1-11qr    i    -19.0  0.04         3         6             5.6     0.5   
+PS1-11qr    z    -18.8  0.17         1         6             10.3    2.1  
+PS1-11bbq   g    -19.6  0.09         1         5             14.4    -9
+PS1-11bbq   r    -19.4  0.09         1         6             9.5     -9
+PS1-11bbq   i    -19.1  0.10         1         6             12.7    -9
+PS1-11bbq   z    -18.9  0.20         1         4             15.0    -9
+PS1-12bb    g    -17.0  0.03         1         5             6.3     0.3   
+PS1-12bb    r    -17.0  0.04         1         5             9.5     1.5
+PS1-12bb    i    -16.9  0.02         1         3             9.6     0.5   
+PS1-12bb    z    -16.8  0.04         1         4             8.2     0.5   
+PS1-12bv    g    -19.4  0.05         3         7             6.0     2.0
+PS1-12bv    r    -19.1  0.05         3         7             6.0     3.0
+PS1-12bv    i    -18.8  0.06         2         6             8.1     0.4
+PS1-12bv    z    -18.6  0.11         3         7             9.0     2.0
+PS1-12brf   g    -18.4  0.05         1         3             6.8     0.5
+PS1-12brf   r    -18.3  0.06         1         3             8.8     0.6
+PS1-12brf   i    -18.3  0.11         4         6             10.5    0.7
+PS1-12brf   z    -18.2  0.22         5         7             10.0    2.0 
+PS1-13duy   g    -19.4  0.10         1         5             16.4    -9
+PS1-13duy   i    -18.9  0.05         1         3             12.9    -9
+PS1-13duy   z    -18.6  0.10         1         4             6.5     1.0
+PS1-13dwm   g    -17.7  0.12         1         4             3.5     1.5
+PS1-13dwm   r    -17.5  0.11         1         4             5       2.0
+PS1-13dwm   z    -17.0  0.22         1         3             4.5     1.5
+PS1-13ess   g    -18.5  0.12         1         6             4.7     0.5   
+PS1-13ess   r    -18.3  0.11         1         6             5.9     0.3   
+PS1-13ess   z    -17.8  0.19         1         4             10.6    1.4

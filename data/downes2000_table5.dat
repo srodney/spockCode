@@ -1,0 +1,57 @@
+# Title: Optical Imaging of Nova Shells and the Maximum Magnitude-Rate of 
+#        Decline Relationship
+# Authors: Downes R.A., Duerbeck H.W.
+# ================================================================================
+# Byte-by-byte Description of file: datafile5.txt
+# --------------------------------------------------------------------------------
+#    Bytes Format Units   Label     Explanations
+# --------------------------------------------------------------------------------
+#    1-  9  A9    ---     Name      Nova name
+#   12- 13  A2    ---     SType     Spectral type
+#       15  A1    ---   f_SType     Indicates uncertain or unknown SType
+#   18- 19  A2    ---     LCType    Lightcurve type
+#       21  A1    ---   f_LCType    Indicates uncertain LCType
+#   24- 28  F5.1  d       t2        Time to decline 2 magnitudes from maximum
+#   31- 35  F5.1  d       t3        Time to decline 3 magnitudes from maximum
+#   38- 42  F5.3  mag/d   Decline   Decline rate
+#   44- 48  F5.1  mag     Vmax      Absolute maximum V band magnitude
+#   53- 56  F4.2  mag   e_Vmax      ? Uncertainty in Vmax
+#   59- 63  F5.2  mag     V15       Absolute V band magnitude 15 days after 
+#                                    maximum
+#   66- 70  A5    ---     Comment   Comment on Nova (1)
+# --------------------------------------------------------------------------------
+# Note (1): 
+#     He = He/N type
+#     Fe = Fe II type
+#     hy = hybrid type, evolving from Fe II into He/N type
+# --------------------------------------------------------------------------------
+# Name   SpType LCtype t2     t3    decline MVmax e_MVmax MV15  comment
+V500Aql   He?   Ao     17.    42.   0.118  -8.7    0.4   -6.8   pg     
+V603Aql   hy    Ao      4.     9.   0.500  -8.9    0.2   -4.9   --       
+V1229Aql  Fe    B?   20.    38.   0.100  -6.7    0.95  -4.9     --     
+TAur      Fe    Ca     45.    50.   0.044  -6.8    0.5   -6.2   pg     
+V842Cen   Fe    Cb     35.    48.   0.057  -7.4    1.0   -6.5   --       
+V450Cyg   Fe    Ca     88.   108.   0.023  -6.5    0.6   -5.9   --       
+V476Cyg   Fe    A       6.    15.   0.333  -9.9    0.6   -6.9   --       
+V1500Cyg  hy    A       2.4    3.7  1.111 -10.7    0.5   -5.5   --       
+V1819Cyg  Fe    Bb     37.    89.   0.054  -6.8    0.5   -5.6   --       
+V1974Cyg  Fe    Ba     17.    37.   0.125  -8.0    0.1   -6.4   ONeMg  
+HRDel     Fe    D     172.   230.   0.012  -6.1    0.4   -4.8   --       
+DQHer     Fe    Ca     39.    86.   0.051  -7.5    0.3   -6.55  --       
+V446Her   He    A       7.    11.5  0.426  -9.9    0.2   -6.5   pg     
+V533Her   Fe    Ba     22.    46.   0.091  -7.5    0.5   -6.1   --       
+CPLac     hy    A       5.3    9.8  0.377  -9.3    0.5   -5.7   --       
+DKLac     Fe    Ao?   11.    24.   0.182  -9.6    0.5   -7.4    --      
+GKPer     He    Ao      7.    13.   0.286  -9.0    0.3   -5.9   --       
+RRPic     Fe    D      20.   127.   0.100  -7.8    0.3   -6.0   --       
+CPPup     He    A       6.     8.   0.333 -10.7    0.5   -6.1   --       
+V351Pup   Fe    A      10.    26.   0.200  -8.4    0.5   -6.1   ONeMg  
+FHSer     Fe    Cb     42.    59.   0.048  -7.3    0.5   -6.45  --       
+XXTau     Fe    Cb     24.    43.   0.083  -8.4    0.75  -7.0   pg     
+RWUMi      ?    Ba     48.    88.   0.042  -7.8    0.9   -7.3   pg     
+LVVul     Fe    Ba     21.    43.   0.095  -7.0    0.45  -5.85  --       
+NQVul     Fe    Bb     23.    53.   0.087  -6.1    0.8   -4.85  --       
+PWVul     Fe    Bb     82.   126.   0.024  -6.7    0.4   -5.3   --       
+QUVul     Fe    Ba     22.    49.   0.091  -7.5    0.25  -6.35  ONeMg  
+QVVul     Fe    Cb     50.    53.   0.040  -6.4    0.5   -5.45  -- 
+      

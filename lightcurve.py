@@ -204,8 +204,13 @@ def plot_lightcurve(src='se', aperture=np.inf,
             iplot = np.where((sn['FILTER'] == band.upper()) &
                              (sn['APER'] == aperture))[0]
             # flux scaling factor to be relative to ZP=25
-            ff = 10 ** (-0.4 * (sn['ZP'][iplot] - 25))
-            pl.errorbar(t[iplot], sn['FLUX'][iplot] * ff, sn['FLUXERR'][iplot] * ff,
+            #f25 = 10 ** (-0.4 * (sn['ZP'][iplot] - 25))
+
+            # flux scaling factor to get fnu in microJanskys
+            fmicroJy = (1e6 * 10 ** (-0.4 * (sn['ZP'][iplot] - 8.9)))
+
+            pl.errorbar(t[iplot], sn['FLUX'][iplot] * fmicroJy,
+                        sn['FLUXERR'][iplot] * fmicroJy,
                         marker=m, color=c, ls=' ', alpha=0.5,
                         label=band.upper())
         elif units == 'mag':
@@ -316,33 +321,30 @@ def mklcfig_single(event='se', presfig=True, units='mag',
     if event.lower() in ['se', 2]:
         tpk = __MJDPKSE__
         axobs.set_xlim(tpk - 12, tpk + 18)
-        if units == 'flux':
-            axobs.set_ylim(-0.04, 0.37)
-        elif units == 'mag':
-            axobs.set_ylim(29.9, 26.1)
         axobs.text(0.12, 0.92, '2 (SE)', fontsize='x-large',
                 transform=axobs.transAxes, ha='left', va='top')
     elif event.lower() in ['nw', 1]:
         tpk = __MJDPKNW__
         axobs.set_xlim(tpk - 12, tpk + 18)
-        if units == 'flux':
-            axobs.set_ylim(-0.04, 0.32)
-        elif units == 'mag':
-            axobs.set_ylim(29.9, 26.1)
-        # axobs.set_xticks([56670, 56690])
         axobs.text(0.12, 0.92, '1 (NW)', fontsize='x-large',
                 transform=axobs.transAxes, ha='left', va='top')
     else:
         raise RuntimeError("Event name %s not recognized."
                            "Use one of ['se', 'nw', 1, 2]")
-    plot_lightcurve(event.lower(), **kwargs)
-    # axobs.axvspan(-tpkerr,tpkerr,color='0.5', alpha=0.5)
 
     axrest = axobs.twiny()
+    plot_lightcurve(event.lower(), units=units, timeframe='rest', **kwargs)
+    # axobs.axvspan(-tpkerr,tpkerr,color='0.5', alpha=0.5)
     axrest.set_xlim((axobs.get_xlim()[0] - tpk) / 2.0054,
                     (axobs.get_xlim()[1] - tpk) / 2.0054)
     axrest.xaxis.set_major_locator(ticker.MultipleLocator(5))
     axrest.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+
+    if units == 'flux':
+        axrest.set_ylim(-0.019, 0.098)
+        axrest.axhline(0.0, ls='--', lw=0.8, color='0.5')
+    elif units == 'mag':
+        axrest.set_ylim(29.9, 26.1)
 
     axobs.xaxis.set_ticks_position('top')
     axobs.xaxis.set_label_position('top')
@@ -359,13 +361,13 @@ def mklcfig_single(event='se', presfig=True, units='mag',
     if axlabels:
         axobs.set_xlabel('MJD :')
         if units == 'flux':
-            axobs.set_ylabel('Flux (zp$_{\rm AB}$=25)', labelpad=8)
+            axobs.set_ylabel('f$_{\\nu}$~[$\\mu$Jy]', labelpad=8)
         elif units == 'mag':
             axobs.set_ylabel('Apparent Magnitude (AB)', labelpad=8)
         axrest.set_xlabel('t$_{\\rm rest}$ :')
 
     if showlegend:
-        axobs.legend(loc='upper right', ncol=2, numpoints=1,
+        axrest.legend(loc='upper right', ncol=2, numpoints=1,
                      columnspacing=0.5,
                      borderpad=0.4, borderaxespad=0.5,
                      labelspacing=0.3, markerscale=0.8,
@@ -374,7 +376,7 @@ def mklcfig_single(event='se', presfig=True, units='mag',
                      handletextpad=0.35, handlelength=0.2)
     # axrest.axhline(0.0, ls='--', color='0.5', lw=0.75)
     # axrest.axvline(0.0, ls='--', color='0.5', lw=0.75)
-    return axobs, axrest
+    return axrest, axobs
 
 
 def mklcfig_double(presfig=False, **kwargs):
@@ -395,16 +397,15 @@ def mklcfig_double(presfig=False, **kwargs):
     for event, ax in zip(
             ['nw', 'se'], [ax1, ax2]):
         fig.sca(ax)
-        axmain, axtop = mklcfig_single(event, presfig=presfig,
+        axrest, axobs = mklcfig_single(event, presfig=presfig,
                                        axlabels=(event == 'nw'),
                                        showlegend=(not presfig and
                                                    event == 'se'),
                                        **kwargs)
         if event=='se':
-            pl.setp(axmain.get_xticklabels()[0:2], visible=False)
+            pl.setp(axobs.get_xticklabels()[0:2], visible=False)
         elif event=='nw':
-            pl.setp(axmain.get_xticklabels()[-2:], visible=False)
-
+            pl.setp(axobs.get_xticklabels()[-2:], visible=False)
 
     ax2.yaxis.set_ticks_position('right')
     ax2.yaxis.set_ticks_position('both')

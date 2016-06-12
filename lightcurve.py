@@ -3,12 +3,18 @@ import numpy as np
 from pytools import plotsetup
 from matplotlib import pyplot as pl, ticker
 from scipy import interpolate as scint
+import sys
+import os
+import exceptions
 
 from constants import __MJDPKNW__, __MJDPKSE__, __Z__
 from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
 from constants import __MJDPREPK0SE__, __MJDPOSTPK0SE__
 
-
+__THISFILE__ = sys.argv[0]
+if 'ipython' in __THISFILE__:
+    __THISFILE__ = __file__
+__THISDIR__ = os.path.abspath(os.path.dirname(__THISFILE__))
 
 __TEMPLATEDATAFILES__ = {
     'M31N 2008-12a (2014)':'m31n_2008-12a_2014_optical.dat',
@@ -172,7 +178,7 @@ def getdata(datfilename, datadir="./data"):
 
 
 def plot_lightcurve(src='se', aperture=np.inf,
-                    showtemplates=True, timeframe='rest',
+                    showtemplates=False, timeframe='rest',
                     units='mag'):
     nw, se = get_spock_data()
     if src.lower() == 'se':
@@ -191,8 +197,11 @@ def plot_lightcurve(src='se', aperture=np.inf,
 
     if timeframe == 'rest':
         t = (sn['MJD'] - mjdpk) / (1 + __Z__)
-    else:
+    elif timeframe.startswith('obs'):
         t = sn['MJD']
+    else:
+        raise exceptions.RuntimeError(
+            "Timeframe must be one of ['rest','obs']")
 
     for band, c, m in zip(['f435w', 'f606w', 'f814w',
                            'f105w', 'f125w', 'f140w', 'f160w'],
@@ -449,13 +458,15 @@ def mk_prediction_fig(presfig=False):
     fig = pl.gcf()
 
     ax1 = fig.add_subplot(2, 1, 1)
-    plot_lightcurve(src='nw')
+    plot_lightcurve(src='nw', units='flux', timeframe='observer')
 
     ax2 = fig.add_subplot(2, 1, 2, sharex=ax1, sharey=ax1)
-    plot_lightcurve(src='se')
+    plot_lightcurve(src='se', units='flux', timeframe='observer')
 
     # read in the time delay data
-    dtdat = ascii.read('data/time_delay_predictions.txt',
+    timedelaydatfile = os.path.join(__THISDIR__,
+                                    'data/time_delay_predictions.txt')
+    dtdat = ascii.read(timedelaydatfile,
                        format='commented_header', header_start=-1,
                        data_start=0 )
     for row in dtdat:
@@ -474,73 +485,65 @@ def mk_prediction_fig(presfig=False):
 
     ax1.axhline(0, color='0.5', lw=0.6, ls='--')
     ax2.axhline(0, color='0.5', lw=0.6, ls='--')
-    ax1.set_xlim(56602, 57048)
-    # ax1.set_ylim(-0.09, 0.38)
+    ax1.set_xlim(56575, 57048)
+    ax1.set_ylim(-0.03, 0.099)
 
-    ax1.set_ylabel('Flux (zp$_{\\rm AB}$=25)', labelpad=-1)
-    ax2.set_ylabel('Flux (zp$_{\\rm AB}$=25)', labelpad=-1)
+    ax1.set_ylabel('Flux [$\\mu$Jy]', labelpad=-1)
+    ax2.set_ylabel('Flux [$\\mu$Jy]', labelpad=-1)
     ax2.set_xlabel('MJD :')
     ax2.xaxis.set_label_coords(0.0, -0.06)
 
-    ax1.text(56870, 0.34,
+
+    ymin, ymax = ax1.get_ylim()
+    yevent = ymin + (ymax - ymin) * 0.6
+    ytextHigh = ymin + (ymax - ymin) * 0.9
+    ytextMid = ymin + (ymax - ymin) * 0.7
+
+    ax1.text(56870, ytextHigh,
              '\\raggedleft \\noindent Predicted appearance\n'
-             'of spock2 event at \n the NW position',
+             'of Spock-2 event at \n the NW position',
              ha='right', va='top', color='darkred')
-    ax1.annotate('\\noindent spock1\\\\ event',
-                 xy=(56680, 0.2), xytext=(56700, 0.34),
+    ax1.annotate('\\noindent Spock-1\\\\ event',
+                 xy=(56680, yevent), xytext=(56700, ytextMid),
                  ha='left', va='top', color='darkblue',
                  arrowprops=dict(color='darkblue', width=0.5, headwidth=3.5,
                                  shrink=0))
 
 
 
-    ax2.text(56715, 0.34,
-             '\\noindent Predicted appearance\\\\of spock1 event at\\\\'
+    ax2.text(56715, ytextHigh,
+             '\\noindent Predicted appearance\\\\of Spock-1 event at\\\\'
              'the SE position',
              ha='left', va='top', color='darkblue')
-    ax2.annotate('\\noindent spock2\\\\ event',
-                 xy=(56890, 0.2), xytext=(56870, 0.34),
+    ax2.annotate('\\noindent Spock-2\\\\ event',
+                 xy=(56890, yevent), xytext=(56870, ytextMid),
                  ha='right', va='top', color='darkred',
                  arrowprops=dict(color='darkred', width=0.5, headwidth=3.5,
                                  shrink=0))
 
-
-
-    #ax1.text(56870, 0.34,
-    #         '\\noindent Expected time of \\\\appearance at \\\\SE position',
-    #         ha='right', va='top', color='darkred')
-
-
-    ax2.xaxis.set_major_locator( ticker.MultipleLocator(50))
-    ax2.xaxis.set_minor_locator( ticker.MultipleLocator(25))
-
-    #ax.xaxis.set_ticks_position('top')
-    #ax.xaxis.set_label_position('top')
-    #ax.xaxis.set_label_coords( -0.15, 1.03)
+    ax2.xaxis.set_major_locator(ticker.MultipleLocator(50))
+    ax2.xaxis.set_minor_locator(ticker.MultipleLocator(25))
 
     pl.setp(ax1.get_xticklabels(),visible=False)
     ax2.xaxis.set_ticks_position('bottom')
     ax2.xaxis.set_label_position('bottom')
 
-    ax1.text(0.97, 0.2, '\\noindent NW position\\\\(image 11.2)',
-             va='bottom', ha='right', transform=ax1.transAxes,
+    ax1.text(56590, ytextHigh, '\\noindent NW position\\\\(image 11.2)',
+             va='top', ha='left', # transform=ax1.transAxes,
              fontsize='large', weight='heavy')
-    ax2.text(0.97, 0.2, '\\noindent  SE position\\\\(image 11.1)',
-             va='bottom', ha='right', transform=ax2.transAxes,
+    ax2.text(57038, ytextHigh, '\\noindent  SE position\\\\(image 11.1)',
+             va='top', ha='right', # transform=ax2.transAxes,
              fontsize='large', weight='heavy')
-    fig.subplots_adjust(left=0.08, right=0.97, top=0.97, bottom=0.1, hspace=0)
-    ax1.text(56885, 0.3, 'J', color='k', ha='center', va='bottom')
-    ax1.text(56913, 0.3, 'O', color='k', ha='center', va='bottom')
-    ax1.text(56930, 0.3, 'W,Z', color='k', ha='center', va='bottom')
-    ax1.text(56955, 0.3, 'D', color='k', ha='center', va='bottom')
+    ax1.text(56885, ytextHigh, 'J',   color='k', ha='center', va='top')
+    ax1.text(56913, ytextHigh, 'O',   color='k', ha='center', va='top')
+    ax1.text(56930, ytextHigh, 'W,Z', color='k', ha='center', va='top')
+    ax1.text(56955, ytextHigh, 'D',   color='k', ha='center', va='top')
+    ax2.text(56692, ytextHigh, 'J',   color='k', ha='center', va='top')
+    ax2.text(56650, ytextHigh, 'W,Z', color='k', ha='center', va='top')
+    ax2.text(56620, ytextHigh, 'D',   color='k', ha='center', va='top')
+    ax2.text(56666, ytextHigh, 'O',   color='k', ha='center', va='top')
 
-    ax2.text(56692, 0.3, 'J', color='k', ha='center', va='bottom')
-    ax2.text(56650, 0.3, 'W,Z', color='k', ha='center', va='bottom')
-    ax2.text(56620, 0.3, 'D', color='k', ha='center', va='bottom')
-    ax2.text(56666, 0.3, 'O', color='k', ha='center', va='bottom')
-
-
-
+    fig.subplots_adjust(left=0.09, right=0.98, top=0.97, bottom=0.1, hspace=0)
 
 
 def microlensing( t, t0, tE, umin):

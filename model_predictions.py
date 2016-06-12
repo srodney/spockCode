@@ -11,7 +11,7 @@ thispath = os.path.abspath( os.path.dirname( thisfile ) )
 
 
 
-def mk_corner_plot(model='oguri'):
+def mk_corner_plot(model='oguri', nbins=None):
 
     if model == 'oguri':
         datfile = os.path.join(thispath,'data/oguri.dat')
@@ -24,7 +24,8 @@ def mk_corner_plot(model='oguri'):
         dat['dt12'] = dat['dt31'] - dat['dt32']
         modelrange = [(-10,90),(-10,250),(2,4),(-4,18),0.999]
         weights = None
-        nbins = 20
+        if nbins is None:
+            nbins = 20
 
     elif model == 'zitrin':
         datfile = os.path.join(thispath,'data/zitrin.dat')
@@ -32,19 +33,38 @@ def mk_corner_plot(model='oguri'):
                          data_start=0, header_start=-1)
         modelrange = [(20,220),(10,70),(2.8,4.5),(15,70), 0.999]
         weights = None
-        nbins = 15
+        if nbins is None:
+            nbins = 15
 
-    elif model == 'jauzac':
-        datfile = os.path.join(thispath,'data/jauzac_td.fits')
+    elif model == 'jauzac1':
+        datfile = os.path.join(thispath,'data/m0416_timedel-mag_bfit.fits')
         dat = Table.read(datfile)
         dat['MAGS1'].name = 'mu1'
         dat['MAGS2'].name = 'mu2'
         dat['MAGS3'].name = 'mu3'
+        dat['EMAGS1'].name = 'errmu1'
+        dat['EMAGS2'].name = 'errmu2'
         dat['DTD_S2'].name = 'dt12'
         dat['DTD_S3'].name = 'dt13'
-        weights = None
+        weights = 1 / np.sqrt(dat['errmu1']**2 + dat['errmu2']**2)
         modelrange = [0.999, 0.999, 0.999, 0.999, 0.999]
-        nbins = 15
+        if nbins is None:
+            nbins = 15
+
+    elif model == 'jauzac2':
+        datfile = os.path.join(thispath,'data/m0416_spock_timedel-mag_bfit.fits')
+        dat = Table.read(datfile)
+        dat['MAGS1'].name = 'mu1'
+        dat['MAGS2'].name = 'mu2'
+        dat['MAGS3'].name = 'mu3'
+        dat['EMAGS1'].name = 'errmu1'
+        dat['EMAGS2'].name = 'errmu2'
+        dat['DTD_S2'].name = 'dt12'
+        dat['DTD_S3'].name = 'dt13'
+        weights = 1 / np.sqrt(dat['errmu1']**2 + dat['errmu2']**2)
+        modelrange = [0.999, 0.999, 0.999, 0.999, 0.999]
+        if nbins is None:
+            nbins = 15
 
     elif model == 'williams':
         datfile = os.path.join(thispath, 'data/williams.dat')
@@ -56,7 +76,8 @@ def mk_corner_plot(model='oguri'):
         weights = 1/ np.sqrt(dat['delx1']**2 + dat['dely1']**2 +
                              dat['delx2']**2 + dat['dely2']**2)
         modelrange = [(-2,25), (-2,35), (0,5), (-50,10), (-4500, -300)]
-        nbins = 12
+        if nbins is None:
+            nbins = 12
 
 
     # reformat as an ordered array of samples for corner plotting

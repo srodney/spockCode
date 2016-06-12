@@ -472,8 +472,6 @@ def mk_prediction_fig(presfig=False):
     for row in dtdat:
         if row['model'] == 'observed':
             continue
-        if row['model'] == 'Jauzac_v1':
-            continue
         tnw = tpkSE - row['dt12']
         tnwerr = row['dt12err']
         ax1.axvspan(tnw-tnwerr, tnw+tnwerr, color='darkred', alpha=0.3)
@@ -481,6 +479,7 @@ def mk_prediction_fig(presfig=False):
         tse = tpkNW + row['dt12']
         tseerr = row['dt12err']
         ax2.axvspan(tse-tseerr, tse+tseerr, color='darkblue', alpha=0.3)
+        # print('%s %.1f +- %.1f' % (row['model'], row['dt12'], row['dt12err']))
 
 
     ax1.axhline(0, color='0.5', lw=0.6, ls='--')
@@ -499,7 +498,7 @@ def mk_prediction_fig(presfig=False):
     ytextHigh = ymin + (ymax - ymin) * 0.9
     ytextMid = ymin + (ymax - ymin) * 0.7
 
-    ax1.text(56870, ytextHigh,
+    ax1.text(56905, ytextHigh,
              '\\raggedleft \\noindent Predicted appearance\n'
              'of Spock-2 event at \n the NW position',
              ha='right', va='top', color='darkred')
@@ -511,7 +510,7 @@ def mk_prediction_fig(presfig=False):
 
 
 
-    ax2.text(56715, ytextHigh,
+    ax2.text(56675, ytextHigh,
              '\\noindent Predicted appearance\\\\of Spock-1 event at\\\\'
              'the SE position',
              ha='left', va='top', color='darkblue')
@@ -534,14 +533,14 @@ def mk_prediction_fig(presfig=False):
     ax2.text(57038, ytextHigh, '\\noindent  SE position\\\\(image 11.1)',
              va='top', ha='right', # transform=ax2.transAxes,
              fontsize='large', weight='heavy')
-    ax1.text(56885, ytextHigh, 'J',   color='k', ha='center', va='top')
-    ax1.text(56913, ytextHigh, 'O',   color='k', ha='center', va='top')
-    ax1.text(56930, ytextHigh, 'W,Z', color='k', ha='center', va='top')
-    ax1.text(56955, ytextHigh, 'D',   color='k', ha='center', va='top')
-    ax2.text(56692, ytextHigh, 'J',   color='k', ha='center', va='top')
-    ax2.text(56650, ytextHigh, 'W,Z', color='k', ha='center', va='top')
-    ax2.text(56620, ytextHigh, 'D',   color='k', ha='center', va='top')
-    ax2.text(56666, ytextHigh, 'O',   color='k', ha='center', va='top')
+    # ax1.text(56885, ytextHigh, 'J',   color='k', ha='center', va='top')
+    # ax1.text(56911, ytextHigh, 'O',   color='k', ha='center', va='top')
+    # ax1.text(56932, ytextHigh, 'J,Z,W', color='k', ha='center', va='top')
+    # ax1.text(56955, ytextHigh, 'D',   color='k', ha='center', va='top')
+    # #ax2.text(56692, ytextHigh, 'J',   color='k', ha='center', va='top')
+    # ax2.text(56649, ytextHigh, 'W,Z,J', color='k', ha='center', va='top')
+    # ax2.text(56620, ytextHigh, 'D',   color='k', ha='center', va='top')
+    # ax2.text(56666, ytextHigh, 'O',   color='k', ha='center', va='top')
 
     fig.subplots_adjust(left=0.09, right=0.98, top=0.97, bottom=0.1, hspace=0)
 

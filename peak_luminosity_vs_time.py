@@ -174,7 +174,7 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
     return
 
 def plot_ps1_fast_transients(
-        ax1, ax2,
+        ax1, ax2, plotrisetime=False,
         datfile=os.path.join(__THISDIR__,'data/drout2014_table4.dat')):
     """ plot the fast transients from Drout et al. 2014"""
     indat = ascii.read(datfile, format='commented_header',
@@ -195,19 +195,20 @@ def plot_ps1_fast_transients(
     # luminosity factor to convert from AB mags to Luminosity in erg/s
     cL0 = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
 
-    for bandname, color in zip(['g','r','i','z'],
-                               ['g', 'darkorange', 'darkred', 'k']):
+    for bandname, color in zip(['g','r'],
+                               ['g', 'darkorange']):
         band = sncosmo.get_bandpass('sdss'+bandname)
         wave_eff = band.wave_eff
         iband = np.where(indat['Band']==bandname)[0]
         logL = np.log10(cL0 / wave_eff) + 40 - (0.4 * M[iband])
         err_logL = 0.4 * indat['err_Mrest'][iband]
-        ax1.errorbar(trise[iband], logL, yerr=err_logL,
-                     xerr=err_trise[iband],
-                     color=color, ls=' ', marker='o')
+        if plotrisetime:
+            ax1.errorbar(trise[iband], logL, yerr=err_logL,
+                         xerr=err_trise[iband], mec=color,
+                         color=color, ls=' ', marker='o')
         ax2.errorbar(t3[iband], logL, yerr=err_logL,
-                     xerr=err_t3[iband],
-                     color=color, ls=' ', marker='o')
+                     xerr=err_t3[iband], mec='k',
+                     color=color, ls=' ', marker='o', ms=8)
 
 
 def plot_known_novae():
@@ -263,7 +264,35 @@ def plot_known_novae():
     wave_eff = 5500
     logLV = np.log10(cL0 / wave_eff) + 40 - (0.4 * MV)
     logLVerr = 0.4*errMV
-    pl.errorbar( t3, logLV, logLVerr, marker='*', color='b', ls=' ')
+    pl.errorbar( t3, logLV, logLVerr, marker='s', mec='k',
+                 color='darkcyan', ls=' ', ms=8)
+
+def plot_RNe():
+    """
+    plot the peak luminosity vs decline time for recurrent novae,
+    using data from Schaefer 2010
+    """
+    MB = np.array(
+        [-7.0, -6.7, -7.6, -7.3, -8.4, -8.8, -7.7, -10.8, -8.1, -9.0])
+    MV = np.array(
+        [-7.1, -6.6, -7.1, -7.4, -8.5, -8.4, -7.6, -10.6, -8.2, -8.9])
+    id = ['T Pyx', 'IM Nor', 'CI Aql',
+          'V2487 Oph', 'U Sco', 'V394 CrA', 'T CrB',
+          'RS Oph', 'V745 Sco', 'V3890 Sgr']
+    trec = np.array([19, 82, 24, 18, 10.3, 30, 80, 14.7, 21, 25])
+    t3 = np.array([62, 80.0, 31.6, 8.4, 2.6, 5.2, 6.0, 14.0, 9.0, 14.4])
+    t2 = np.array([32, 50.0, 25.4, 6.2, 1.2, 2.4, 4.0, 6.8, 6.2, 6.4])
+
+    cL0 = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
+    wave_effV = 5500
+    logLV = np.log10(cL0 / wave_effV) + 40 - (0.4 * MV)
+
+    wave_effB = 4385
+    logLB = np.log10(cL0 / wave_effB) + 40 - (0.4 * MB)
+
+    ax = pl.gca()
+    ax.plot(t3, logLV, marker='d', color='darkcyan', ls=' ', ms=8)
+    ax.plot(t3, logLB, marker='d', color='blue', ls=' ', ms=8)
 
 
 def plot_yaron2005_models(
@@ -332,7 +361,7 @@ def plot_mmrd():
     pl.fill_between( t3, logLmax, logLmin, color='k', alpha=0.3)
 
 
-def peak_luminosity_vs_time(mumin=10,mumax=100):
+def mk_figure(mumin=10,mumax=100, plotrisetime=False):
     """ Read in the data file giving apparent magnitude vs time inferred from
     the linear fits to four observed bands.  Read in the data file giving the
     K correction as a function of time for converting each observed HST band
@@ -342,10 +371,17 @@ def peak_luminosity_vs_time(mumin=10,mumax=100):
 
     :return:
     """
-    fig = plotsetup.fullpaperfig(figsize=[8,3.5])
-    fig.clf()
-    ax1 = fig.add_subplot(1,2,1)
-    ax2 = fig.add_subplot(1,2,2, sharey=ax1)
+    if plotrisetime:
+        fig = plotsetup.fullpaperfig(figsize=[8, 3.5])
+        fig.clf()
+        ax1 = fig.add_subplot(1,2,1)
+        ax2 = fig.add_subplot(1,2,2, sharey=ax1)
+    else:
+        fig = plotsetup.halfpaperfig(figsize=[4, 4])
+        fig.clf()
+        ax2 = fig.add_subplot(1,1,1)
+        ax1 = ax2
+
     magdatfile = os.path.join(__THISDIR__,'data/magpk_trise_tfall_kcor.dat')
     indat = ascii.read(magdatfile, format='commented_header',
                         header_start=-1, data_start=0)
@@ -374,34 +410,46 @@ def peak_luminosity_vs_time(mumin=10,mumax=100):
         logLmin = np.log10(cL0 / wave_eff) + 40 - (0.4 * MABmin[iband])
         logLmax = np.log10(cL0 / wave_eff) + 40 - (0.4 * MABmax[iband])
 
-        ax1.fill_between(indat['trise'][iband], logLmin, logLmax,
-                         color=c, alpha=0.3, label=label)
+        if plotrisetime:
+            ax1.fill_between(indat['trise'][iband], logLmin, logLmax,
+                             color=c, alpha=0.3, label=label)
         ax2.fill_between(indat['t3'][iband], logLmin, logLmax,
                          color=c, alpha=0.3, label=label)
 
-        #ax2.plot(indat['t3'][iband], logLmin, marker=' ', ls='-',
-        #         color=c, alpha=0.3, label=label)
-        #ax2.plot(indat['t3'][iband], logLmax, marker=' ', ls='-',
-        #         color=c, alpha=0.3, label=label)
+    if plotrisetime:
+        ax1.set_xlabel('t$_{\\rm rise}$: max rise time from 0 flux (days)')
+        pl.setp(ax2.get_yticklabels(), visible=False)
+        pl.setp(ax1.get_xticklabels()[-1], visible=False)
+        fig.subplots_adjust(left=0.08, right=0.97, bottom=0.16, top=0.97,
+                            wspace=0)
+        ax1.set_xlim(0, 15)
+    else:
+        fig.subplots_adjust(left=0.16, right=0.97, bottom=0.16, top=0.97,
+                            wspace=0)
 
-    ax = pl.gca()
-    ax1.set_xlabel('maximum rise time from 0 flux to peak (days)')
-    ax1.set_ylabel('log(L [erg/s])')
-    ax2.set_xlabel('t$_{3}$: maximum time to decline by 3 mag (days)')
-    fig.subplots_adjust(left=0.13, right=0.97, bottom=0.1, top=0.97, wspace=0)
+    ax1.set_ylabel('log\,(\,L$_{\\rm pk}$~ [erg/s]\,)')
+    ax2.set_xlabel('t$_{3}$: time to decline by 3 mag (days)')
 
     plot_mmrd()
-    plot_yaron2005_models()
+    # plot_yaron2005_models()
     plot_known_novae()
-    plot_ps1_fast_transients(ax1, ax2)
+    plot_RNe()
+    plot_ps1_fast_transients(ax1, ax2, plotrisetime=plotrisetime)
 
-    ax1.set_xlim(0,12)
-    ax2.set_xlim(0,12)
+    #ax1.text(8, 43, 'PS1 Fast Transients', ha='left', va='top',
+    #         fontsize='small')
+    ax2.text(8, 43.2, 'Fast Transients', ha='right', va='top',
+             fontsize='medium')
+
+    ax2.text(6, 41.8, 'HFF14Spo', ha='right', va='top',
+             fontsize='medium', color='k', rotation=-20)
+
+    ax2.text(13, 38.2, 'Novae', ha='right', va='top',
+             fontsize='medium', color='k')
+
+    ax2.set_xlim(-0.2,15.2)
+    ax2.set_ylim(37.5, 43.5)
     # ax2.semilogx()
-    fig = pl.gcf()
-    fig.subplots_adjust(left=0.08, bottom=0.16, right=0.95, top=0.95)
-    pl.setp(ax2.get_yticklabels(), visible=False)
-    pl.setp(ax1.get_xticklabels()[-1], visible=False)
     pl.setp(ax2.get_xticklabels()[0], visible=False)
     pl.draw()
 

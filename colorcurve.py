@@ -52,8 +52,8 @@ def mk_color_curves_figure():
             maginterpdict[band] = (popt, pcov)
 
         # plot observer-frame measured mags in the top panel, with linear
-        # fit lines overlaid, then plot inferred rest-frame colors in the
-        # bottom panel
+        # fit lines overlaid, then plot interpolated observer-frame colors in
+        # the bottom panel
         for band1, color, marker in zip(
                 ['f435w', 'f606w', 'f814w',
                  'f105w', 'f125w', 'f140w', 'f160w'],
@@ -103,20 +103,6 @@ def mk_color_curves_figure():
                 c12 = m1 - m2
                 c12err = np.sqrt(merr1**2 + merr2**2)
                 colorname = band1.upper() + '-' + band2.upper()
-
-                if ((band1 in __VEGARESTBANDNAME__) and
-                        (band2 in __VEGARESTBANDNAME__)):
-                    vegacolorname = (__VEGARESTBANDNAME__[band1][7:] + '-' +
-                                     __VEGARESTBANDNAME__[band2][7:]).upper()
-                    kcorr1 = kcorrections.get_kcorrection(
-                        event, band1, t1, restphotsys='Vega')
-                    kcorr2 = kcorrections.get_kcorrection(
-                        event, band2, t1, restphotsys='Vega')
-                    c12vega = ((m1+kcorr1) - (m2+kcorr2))
-                    for i,j in zip(ib, range(len(ib))):
-                        print('%.1f  %s ~ %s = %.2f +- %.2f' % (
-                            mjd[i], colorname, vegacolorname,
-                            c12vega[j], c12err[j]))
 
                 ax2.errorbar(t1, c12, c12err,
                              marker=marker, ls= ' ', color=color, mec=mec,

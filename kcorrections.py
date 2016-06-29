@@ -213,15 +213,23 @@ def get_kcorrection(event, obsband, trestrelpk, restphotsys='Vega'):
             "data/magpk_trise_tfall_kcor_%s.dat" % restphotsys.lower())
         data = ascii.read(kcordatfile, format='commented_header',
                           header_start=-1, data_start=0)
-        if restphotsys.lower() == 'vega':
-            __RESTBANDNAME__ = __VEGARESTBANDNAME__
-        else:
-            __RESTBANDNAME__ = __ABRESTBANDNAME__
         iobs = np.where((data['event']==event) &
                         (data['obsband']==obsband.lower()))[0]
         trelpk = data['deltatpk'][iobs]
         kcor = data['kcor'][iobs]
         interpolator = scint.interp1d(trelpk, kcor)
+        return interpolator(trestrelpk)
+
+
+def get_linfitmag(event, obsband, trestrelpk):
+        linfitdatfile = os.path.join(__THISDIR__, "data/magpk_trise_tfall.dat")
+        data = ascii.read(linfitdatfile, format='commented_header',
+                          header_start=-1, data_start=0)
+        iobs = np.where((data['event']==event) &
+                        (data['band']==obsband.lower()))[0]
+        trelpk = data['deltatpk'][iobs]
+        maglinfit = data['mpk'][iobs]
+        interpolator = scint.interp1d(trelpk, maglinfit)
         return interpolator(trestrelpk)
 
 
@@ -392,6 +400,11 @@ def compute_spock_kcorrections_from_observed_data(restphotsys='Vega'):
     fitdat = ascii.read(indatfile, format='commented_header', header_start=-1,
                         data_start=0)
 
+    outfile = os.path.join(__THISDIR__, 'data/observed_colors_kcorrected.dat')
+    fout = open(outfile,'w')
+    print("# event  trest c1abname c1ab c2abname c2ab  "
+          "c1veganame c1vega c2veganame c2vega ", file=fout)
+
     # for each observed data point from -6 days to 0 days in the observer
     # frame, get the interpolated magnitudes from the linear fits
     # and the observed magnitudes from the light curve data
@@ -463,8 +476,52 @@ def compute_spock_kcorrections_from_observed_data(restphotsys='Vega'):
                                          source_flux_unit='magab',
                                          obsphotsys='AB', restphotsys='AB',
                                          verbose=False)
-            print("%.1f  %s ->%s = %.1f ->%s = %.2f" % (
-                trest, obsbandname, abrestbandname, abkcor,
-                vegarestbandname, vegakcor))
 
+            # To construct a color measurement, we also need the interpolated
+            # magnitude from a redder band. We get these from the linear fits
+            # made to well sampled bands, reading in from the data file that
+            # was produced by the peak_luminosity_vs_time.py module
+            if obsbandname.lower().startswith('f1'):
+                fitbandname1 = 'f125w'
+                fitbandname2 = 'f160w'
+            else:
+                fitbandname1 = 'f435w'
+                fitbandname2 = 'f814w'
+            m1fit = get_linfitmag(event, fitbandname1, trest)
+            m2fit = get_linfitmag(event, fitbandname2, trest)
+
+            # now we get the K corrections to convert from the observer-frame
+            # band to the rest-frame band and the AB or Vega system
+            kcor1vega = get_kcorrection(event, fitbandname1, trest, restphotsys='Vega')
+            kcor2vega = get_kcorrection(event, fitbandname1, trest, restphotsys='Vega')
+            kcor1ab = get_kcorrection(event, fitbandname1, trest, restphotsys='AB')
+            kcor2ab = get_kcorrection(event, fitbandname1, trest, restphotsys='AB')
+
+            fitbandname1restAB = __ABRESTBANDNAME__[fitbandname1]
+            fitbandname2restAB = __ABRESTBANDNAME__[fitbandname2]
+
+            fitbandname1restVega = __VEGARESTBANDNAME__[fitbandname1]
+            fitbandname2restVega = __VEGARESTBANDNAME__[fitbandname2]
+
+
+            # Here is the observed magnitude in the bluer band
+            mobs = sn['MAG'][i]
+
+            # now we can compute the AB or Vega color in rest-frame band passes
+            cab1 = (mobs + abkcor) - (m1fit + kcor1ab)
+            cab2 = (mobs + abkcor) - (m2fit + kcor2ab)
+            cvega1 = (mobs + vegakcor) - (m1fit + kcor1vega)
+            cvega2 = (mobs + vegakcor) - (m2fit + kcor2vega)
+
+            obscolorname1 = '%s-%s' % (obsbandname.lower(), fitbandname1)
+            obscolorname2 = '%s-%s' % (obsbandname.lower(), fitbandname2)
+            abcolorname1 = '%s-%s'%(abrestbandname[4:], fitbandname1restAB[4:])
+            abcolorname2 = '%s-%s'%(abrestbandname[4:], fitbandname2restAB[4:])
+            vegacolorname1 = '%s-%s'%(vegarestbandname[7:], fitbandname1restVega[7:])
+            vegacolorname2 = '%s-%s'%(vegarestbandname[7:], fitbandname2restVega[7:])
+
+            print("%s %.1f  %4s  %6.1f  %4s  %6.1f  %4s  %6.1f  %4s  %6.1f  " % (
+                event, trest, abcolorname1, cab1, abcolorname2, cab2,
+                vegacolorname1, cvega1, vegacolorname2, cvega2), file=fout)
+    fout.close()
 

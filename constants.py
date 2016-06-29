@@ -1,4 +1,6 @@
 from astropy import cosmology
+import os
+import sys
 
 __MJDPKNW__ = 56672.7
 __MJDPKSE__ = 56901.5
@@ -16,5 +18,14 @@ __OM__ = 0.3
 cosmo = cosmology.FlatLambdaCDM( name="WMAP9", H0=__H0__, Om0=__OM__ )
 __DM__ = cosmo.distmod( __Z__ ).value
 
-__RESTBANDNAME__ = {'f435w':'bessellux','f814w':'bessellb',
-                    'f125w':'sdssr', 'f160w':'sdssi'}
+__ABRESTBANDNAME__ = {'f435w':'sdssu','f814w':'sdssg',
+                      'f125w':'sdssr', 'f160w':'sdssi'}
+
+__VEGARESTBANDNAME__ = {'f435w':'bessellux','f814w':'bessellb',
+                        'f125w':'bessellr', 'f160w':'besselli'}
+
+__THISFILE__ = sys.argv[0]
+if 'ipython' in __THISFILE__:
+    __THISFILE__ = __file__
+__THISDIR__ = os.path.abspath(os.path.dirname(__THISFILE__))
+

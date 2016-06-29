@@ -116,7 +116,7 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
             # We arbitrarily set the "0-flux" magnitude to 30
             # mag0 = riseslope * tprepk0 + risezpt  # alternative definition
             mag0 = 30
-            for deltatpk in np.arange(0,tpostpk0,0.1):
+            for deltatpk in np.arange(tprepk0,tpostpk0,0.1):
                 magpk = riseslope * deltatpk + risezpt
                 declineslope = (mag0 - magpk) / (tpostpk0-deltatpk)
                 declinezpt = magpk - declineslope * deltatpk

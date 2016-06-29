@@ -7,14 +7,10 @@ import sys
 import os
 import exceptions
 
-from constants import __MJDPKNW__, __MJDPKSE__, __Z__
+from constants import __MJDPKNW__, __MJDPKSE__, __Z__, __THISDIR__
 from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
 from constants import __MJDPREPK0SE__, __MJDPOSTPK0SE__
 
-__THISFILE__ = sys.argv[0]
-if 'ipython' in __THISFILE__:
-    __THISFILE__ = __file__
-__THISDIR__ = os.path.abspath(os.path.dirname(__THISFILE__))
 
 __TEMPLATEDATAFILES__ = {
     'M31N 2008-12a (2014)':'m31n_2008-12a_2014_optical.dat',

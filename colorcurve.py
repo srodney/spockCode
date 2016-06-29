@@ -1,13 +1,16 @@
 from constants import __MJDPKNW__, __MJDPKSE__, __Z__
-from . import lightcurve
-from scipy import interpolate as scint
+from . import lightcurve, kcorrections
+# from scipy import interpolate as scint
 from scipy import optimize as scopt
 import numpy as np
 from matplotlib import pyplot as pl
 from pytools import plotsetup
+from matplotlib import rcParams
+
 
 def mk_color_curves_figure():
     fig = plotsetup.halfpaperfig()
+    rcParams['text.usetex'] = False
     fig.clf()
     def line(x, slope, zpt):
         return slope*x + zpt

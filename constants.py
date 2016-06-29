@@ -18,11 +18,15 @@ __OM__ = 0.3
 cosmo = cosmology.FlatLambdaCDM( name="WMAP9", H0=__H0__, Om0=__OM__ )
 __DM__ = cosmo.distmod( __Z__ ).value
 
-__ABRESTBANDNAME__ = {'f435w':'sdssu','f814w':'sdssg',
-                      'f125w':'sdssr', 'f160w':'sdssi'}
+__ABRESTBANDNAME__ = {'f435w':'sdssu', 'f606w':'sdssu',
+                      'f814w':'sdssg', 'f105w':'sdssg',
+                      'f125w':'sdssr', 'f140w':'sdssr',
+                      'f160w':'sdssi'}
 
-__VEGARESTBANDNAME__ = {'f435w':'bessellux','f814w':'bessellb',
-                        'f125w':'bessellr', 'f160w':'besselli'}
+__VEGARESTBANDNAME__ = {'f435w':'bessellux', 'f606w':'bessellux',
+                        'f814w':'bessellb', 'f105w':'bessellv',
+                        'f125w':'bessellr', 'f140w':'bessellr',
+                        'f160w':'besselli'}
 
 __THISFILE__ = sys.argv[0]
 if 'ipython' in __THISFILE__:

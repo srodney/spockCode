@@ -1,17 +1,20 @@
 from __future__ import print_function
-from constants import (__Z__, __ABRESTBANDNAME__, __VEGARESTBANDNAME__,
-                       __THISDIR__)
+from constants import  __THISDIR__, __ABRESTBANDNAME__, __VEGARESTBANDNAME__
+from constants import __MJDPKNW__, __MJDPKSE__, __Z__
+from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
+from constants import __MJDPREPK0SE__, __MJDPOSTPK0SE__
 
+from . import lightcurve
 from scipy import interpolate as scint
 from scipy import integrate as scintegrate
 import numpy as np
 from astropy.io import ascii
 import sncosmo
 import os
+from matplotlib import pyplot as pl
 
 
-
-def compute_kcorrections(restphotsys='Vega'):
+def compute_spock_kcorrections_from_linear_fits(restphotsys='Vega'):
     """ Derive K corrections for the Spock events at times preceding the
     observed date of peak brightness, and extending to times beyond the
     observed peak (assuming the light curve continued to rise linearly in mag
@@ -64,23 +67,23 @@ def compute_kcorrections(restphotsys='Vega'):
     gnuR = 3631 * 1e9 # microJanskys
 
     for event in ['nw','se']:
-        # get a list of the observed bandpasses for this event
+        # get a list of the bandpasses for which we have a linear fit
         ievent = np.where(indat['event'] == event)[0]
-        obsbandnamelist = np.array(np.unique(indat['band'][ievent]), dtype=str)
+        fitbandnamelist = np.array(np.unique(indat['band'][ievent]), dtype=str)
 
         # define dictionaries to hold sncosmo Bandpass objects for each
         # observer-frame band and the corresponding rest-frame band.
         obsbandpassdict = dict(
             [(obsbandname, sncosmo.get_bandpass(obsbandname))
-             for obsbandname in np.unique(indat['band'])])
+             for obsbandname in fitbandnamelist])
         restbandpassdict = dict(
             [(obsbandname,sncosmo.get_bandpass(__RESTBANDNAME__[obsbandname]))
-             for obsbandname in np.unique(indat['band'])])
+             for obsbandname in fitbandnamelist])
 
         # fill in the dictionaries with the bandpass transmission functions
         obsbandtransdict = {}
         restbandtransdict = {}
-        for obsbandname in obsbandnamelist:
+        for obsbandname in fitbandnamelist:
             obsbandpass = obsbandpassdict[obsbandname]
             obsbandtransdict[obsbandname] = scint.interp1d(
                 obsbandpass.wave, obsbandpass.trans, bounds_error=False,
@@ -102,7 +105,7 @@ def compute_kcorrections(restphotsys='Vega'):
             # First, collect fnu and central wavelength values for each band
             fnulist = []
             wavelist = []
-            for obsbandname in obsbandnamelist:
+            for obsbandname in fitbandnamelist:
                 i = np.where((indat['event'] == event) &
                              (indat['band'] == obsbandname) &
                              (indat['deltatpk'] == trelpk))[0]
@@ -116,8 +119,8 @@ def compute_kcorrections(restphotsys='Vega'):
 
             # define a piecewise linear interpolation through the given bands
             def fnuinterp(w):
-                return (np.where(
-                    w>=max(wavelist),
+                return np.where(
+                    w >= max(wavelist),
                     scint.interp1d(wavelist, fnulist, kind='linear',
                                    bounds_error=False,
                                    fill_value=fnulist[np.argmax(wavelist)]
@@ -125,13 +128,9 @@ def compute_kcorrections(restphotsys='Vega'):
                     scint.interp1d(wavelist, fnulist, kind='linear',
                                    bounds_error=False,
                                    fill_value=fnulist[np.argmin(wavelist)]
-                                   )(w)))
+                                   )(w))
 
-            for obsbandname in obsbandnamelist:
-                irow = np.where((indat['event'] == event) &
-                                (indat['deltatpk'] == trelpk) &
-                                (indat['band'] == obsbandname))[0]
-                row = indat[irow]
+            for obsbandname in fitbandnamelist:
                 # define the K correction integrands (following Hogg on NED)
                 # and integrate them numerically
                 obsbandpass = obsbandpassdict[obsbandname]
@@ -163,19 +162,21 @@ def compute_kcorrections(restphotsys='Vega'):
                         (obs_source_integrated * rest_band_integrated) /
                         (obs_band_integrated * rest_source_integrated))
 
+                irow = np.where((indat['event'] == event) &
+                                (indat['deltatpk'] == trelpk) &
+                                (indat['band'] == obsbandname))[0]
+                row = indat[irow]
                 rowstr = str(row).split('\n')[-1]
-                print("%s  %15s  %.3f " % ( rowstr, restbandname, kcorval ),
+                print("%s  %15s  %.3f " % (rowstr, restbandname, kcorval),
                       file=fout)
     fout.close()
 
 
-from matplotlib import pyplot as pl
 def plot_kcorrections():
     """
     :param restphotsys: rest-frame photometric system
     :return:
     """
-
     pl.clf()
     fig = pl.gcf()
     ax1 = fig.add_subplot(1,2,1)
@@ -205,4 +206,265 @@ def plot_kcorrections():
     ax1.set_ylabel('K correction (mag)')
 
     fig.subplots_adjust(left=0.08, right=0.95, bottom=0.12, top=0.97)
+
+def get_kcorrection(event, obsband, trestrelpk, restphotsys='Vega'):
+        kcordatfile = os.path.join(
+            __THISDIR__,
+            "data/magpk_trise_tfall_kcor_%s.dat" % restphotsys.lower())
+        data = ascii.read(kcordatfile, format='commented_header',
+                          header_start=-1, data_start=0)
+        if restphotsys.lower() == 'vega':
+            __RESTBANDNAME__ = __VEGARESTBANDNAME__
+        else:
+            __RESTBANDNAME__ = __ABRESTBANDNAME__
+        iobs = np.where((data['event']==event) &
+                        (data['obsband']==obsband.lower()))[0]
+        trelpk = data['deltatpk'][iobs]
+        kcor = data['kcor'][iobs]
+        interpolator = scint.interp1d(trelpk, kcor)
+        return interpolator(trestrelpk)
+
+
+def plot_filter_curves():
+    import sncosmo
+    fig = pl.gcf()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+
+    for band, col, name in zip(['ux','b','v','r','i'],
+                               ['darkorchid','b','g','r','darkorange'],
+                               ['U','B','V','R','I']):
+        R = sncosmo.get_bandpass('bessell' + band)
+        ax1.plot(R.wave * (1 + __Z__), R.trans, color=col, ls='-', label=name)
+
+    for band, col, name in zip(['u','g','r','i'],
+                               ['darkorchid','g','r','darkorange'],
+                               ["u'","g'","r'","i'"]):
+        R = sncosmo.get_bandpass('sdss' + band)
+        ax2.plot(R.wave * (1 + __Z__), R.trans, color=col, ls='-', label=name)
+
+    for band in ['f435w','f606w','f814w','f105w','f125w','f140w','f160w']:
+        R = sncosmo.get_bandpass(band)
+        ax1.plot(R.wave, R.trans, color='k', ls='--', label='__nolegend__')
+        ax2.plot(R.wave, R.trans, color='k', ls='--', label='__nolegend__')
+
+    ax1.legend()
+    ax2.legend()
+    pl.draw()
+
+
+def compute_kcorrection(restbandname, obsbandname, redshift,
+                        source_wave, source_flux,
+                        source_wave_unit='Angstrom',
+                        source_flux_unit='ABmag',
+                        obsphotsys='AB', restphotsys='AB',
+                        verbose=False):
+    """ compute k corrections for a source at the given redshift
+    :param restbandname: the name of an sncosmo bandpass (rest-frame)
+    :param obsbandname: the name of an sncosmo bandpass (observed)
+    :param redshift: redshift of the source
+    :param source_wave: array of wavelength values for the source SED
+    :param source_flux: array of flux or mag values for the source SED
+    :param source_wave_unit: physical units for the source wavelength array
+           choose from ['Angstrom','um']
+    :param source_flux_unit: physical units for the source flux array
+           choose from ['microJansky','magAB','erg/(Angstrom cm2 sec)']
+    :return:
+    """
+    # Some lux densities, e.g. from sncosmo, are Flambda, in units
+    # of [erg / (Angstrom cm2 sec)].  We want Fnu, in units of
+    # microJanskys, for consistency with the observed flux measurements
+    # This conversion factor includes the factor of 1/c (with c in
+    # Angstrom / sec) to get from Flambda to Fnu, and the unit conversion
+    # from [erg/(cm2 sec Hz)] to microJanskys.  Note that you also have
+    # to include the factor of 1/wavelength**2 to convert from Flambda to Fnu
+    flam2fnu_conversion_factor = 0.33356409519815206 * 1e14
+
+    # get sncosmo Bandpass objects for the
+    # observer-frame band and the corresponding rest-frame band.
+    obsbandpass = sncosmo.get_bandpass(obsbandname)
+    restbandpass = sncosmo.get_bandpass(restbandname)
+
+    # get the bandpass transmission functions
+    obsbandtrans = scint.interp1d(
+        obsbandpass.wave, obsbandpass.trans, bounds_error=False,
+        fill_value=0)
+    restbandtrans = scint.interp1d(
+        restbandpass.wave, restbandpass.trans, bounds_error=False,
+        fill_value=0)
+
+    # Define the spectral density of flux for the 'standard' zero-magnitude
+    # source in the emitted-frame (Q) and the observed frame (R).
+    # Also select the correct __RESTBANDNAME__ dict which holds the manually
+    # identified rest-frame band that most closely matches each
+    # obs-frame filter.
+    if restphotsys.lower()=='vega' or obsphotsys.lower()=='vega':
+        vega = sncosmo.get_magsystem('vega')
+        vegainterp = scint.interp1d(
+            vega._refspectrum.wave, vega._refspectrum.flux,
+            bounds_error=False, fill_value=0, assume_sorted=True)
+        gnuVega = lambda l: vegainterp(l) * l * l * flam2fnu_conversion_factor
+    if restphotsys.lower()=='vega':
+        gnuQ = gnuVega
+    if obsphotsys.lower()=='vega':
+        gnuR = gnuVega
+
+    # For K corrections to/from the AB system we have the simpler AB standard
+    # source that is flat in Fnu. We make this into a python lambda
+    # function anyway, to match the Vega version.
+    gnuAB = lambda l: 3631 * 1e9 # microJanskys
+    if restphotsys.lower()=='ab':
+        gnuQ = gnuAB
+    if obsphotsys.lower()=='ab':
+        gnuR = gnuAB
+
+    if source_wave_unit.lower().startswith('angstrom'):
+        source_wave_angstrom = source_wave
+    elif source_wave_unit.lower().startswith('um'):
+        source_wave_angstrom = 10000 * source_wave
+    elif source_wave_unit.lower().startswith('nm'):
+        source_wave_angstrom = 10 * source_wave
+    else:
+        raise RuntimeError("source wavelength unit %s not recognized" %
+                           source_wave_unit)
+
+    if source_flux_unit.lower().startswith('microjansky'):
+        source_flux_microjanskys = source_flux
+    elif source_flux_unit.lower() == 'magab':
+        source_flux_microjanskys = 10**(23.9-source_flux)/2.5
+    elif source_flux_unit.lower() == 'erg/(Angstrom cm2 sec)':
+        source_flux_microjanskys = (source_flux * source_wave * source_wave *
+                                    flam2fnu_conversion_factor)
+    else:
+        raise RuntimeError("source flux unit %s not recognized" %
+                           source_flux_unit)
+
+    # Define the K correction integrands (following K-corrections guide
+    # from D. Hogg via NED) and integrate them numerically
+
+    # Define an interpolation function to compute the flux in units of uJy
+    fnuinterp = scint.interp1d(source_wave_angstrom, source_flux_microjanskys,
+                               bounds_error=False, fill_value=0)
+
+    wave_observed = np.arange(obsbandpass.wave.min(),
+                              obsbandpass.wave.max(), 10)
+    wave_emitted = np.arange(obsbandpass.wave.min()/(1+redshift),
+                             obsbandpass.wave.max()/(1+redshift), 10)
+
+    def obs_source_integrand(w):
+        return (fnuinterp(w)/w) * obsbandtrans(w)
+    obs_source_integrated = scintegrate.trapz(
+        obs_source_integrand(wave_observed),
+        wave_observed)
+    def obs_band_integrand(w):
+        return (1/w) * gnuR(w) * obsbandtrans(w)
+    obs_band_integrated = scintegrate.trapz(
+        obs_band_integrand(wave_observed),
+        wave_observed)
+    def rest_band_integrand(w):
+        return (1/w) * gnuQ(w) * restbandtrans(w)
+    rest_band_integrated = scintegrate.trapz(
+        rest_band_integrand(wave_emitted),
+        wave_emitted)
+    def rest_source_integrand(w):
+        return (fnuinterp((1+__Z__)*w)/w) * restbandtrans(w)
+    rest_source_integrated = scintegrate.trapz(
+        rest_source_integrand(wave_emitted),
+        wave_emitted)
+
+    kcorval = -2.5 * np.log10(
+            (1 + __Z__) *
+            (obs_source_integrated * rest_band_integrated) /
+            (obs_band_integrated * rest_source_integrated))
+
+    if verbose:
+        print("%10s %10s %.3f" % (
+            restbandname, obsbandname, kcorval))
+    return kcorval
+
+
+def compute_spock_kcorrections_from_observed_data(restphotsys='Vega'):
+    # read in the observed spock data
+    nw, se = lightcurve.get_spock_data()
+
+    # read in the data file produced by linear fits to the pre-peak data
+    indatfile = os.path.join(__THISDIR__, 'data/magpk_trise_tfall.dat')
+    fitdat = ascii.read(indatfile, format='commented_header', header_start=-1,
+                        data_start=0)
+
+    # for each observed data point from -6 days to 0 days in the observer
+    # frame, get the interpolated magnitudes from the linear fits
+    # and the observed magnitudes from the light curve data
+    for event in ['nw','se']:
+        if event.lower()=='se':
+            sn = se
+            mjdpkobs = __MJDPKSE__
+            mjdprepk0, mjdpostpk0 = __MJDPREPK0SE__, __MJDPOSTPK0SE__
+            iax = 2
+        else:
+            sn = nw
+            mjdpkobs = __MJDPKNW__
+            mjdprepk0, mjdpostpk0 = __MJDPREPK0NW__, __MJDPOSTPK0NW__
+            iax = 1
+        # NOTE: the rest-frame time is always defined relative to the
+        #  *observed* MJD of peak brightness, not the assumed mjdpk
+        mjd = sn['MJD']
+        trest = (mjd-mjdpkobs)/(1+__Z__)
+        tprepk0 = (mjdprepk0-mjdpkobs)/(1+__Z__)
+        tpostpk0 = (mjdpostpk0-mjdpkobs)/(1+__Z__)
+
+        trestfit = fitdat['deltatpk']
+        mabfit = fitdat['mpk']
+        fitfilterlist = np.unique(fitdat['band'])
+        inearpeak = np.where((trest>tprepk0) & (trest<=0))[0]
+        for i in inearpeak:
+            # for each observed data point,
+            # construct a crude SED from the linear fits
+            # and this observed data point
+            obsbandname = sn['FILTER'][i].lower()
+            #if obsbandname in fitfilterlist:
+            #    continue
+
+            source_wave = []
+            source_flux = []
+
+            trest = (sn['MJD'][i] - mjdpkobs)/(1+__Z__)
+            if trest<np.min(trestfit): continue
+            if trest>np.max(trestfit): continue
+            bandpass = sncosmo.get_bandpass(obsbandname)
+            source_wave.append(bandpass.wave_eff)
+            source_flux.append(sn['MAG'][i])
+
+            ifit = np.where((np.abs(trestfit - trest) < 0.1) &
+                            (fitdat['event'] == event))[0]
+            for j in ifit:
+                bandpass = sncosmo.get_bandpass(fitdat['band'][j])
+                source_wave.append(bandpass.wave_eff)
+                source_flux.append(fitdat['mpk'][j])
+
+            isorted = np.argsort(source_wave)
+
+            source_wave = np.array(source_wave)
+            source_flux = np.array(source_flux)
+            abrestbandname = __ABRESTBANDNAME__[obsbandname]
+            vegarestbandname = __VEGARESTBANDNAME__[obsbandname]
+            abkcor = compute_kcorrection(abrestbandname, obsbandname,
+                                         __Z__, source_wave[isorted],
+                                         source_flux[isorted],
+                                         source_wave_unit='Angstrom',
+                                         source_flux_unit='magab',
+                                         obsphotsys='AB', restphotsys='AB',
+                                         verbose=False)
+
+            vegakcor = compute_kcorrection(vegarestbandname, obsbandname,
+                                         __Z__, source_wave[isorted],
+                                         source_flux[isorted],
+                                         source_wave_unit='Angstrom',
+                                         source_flux_unit='magab',
+                                         obsphotsys='AB', restphotsys='AB',
+                                         verbose=False)
+            print("%.1f  %s ->%s = %.1f ->%s = %.2f" % (
+                trest, obsbandname, abrestbandname, abkcor,
+                vegarestbandname, vegakcor))
+
 

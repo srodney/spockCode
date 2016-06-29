@@ -63,9 +63,9 @@ def mk_color_curves_figure():
         # the bottom panel
         for band1, color, marker in zip(
                 ['f435w', 'f606w', 'f814w',
-                 'f105w', 'f125w', 'f140w', 'f160w'],
-                ['c', 'b', 'darkgreen', 'darkorange', 'r', 'm', 'darkred'],
-                ['^', '>', 'v', 's', 'd', 'h', 'o']):
+                 'f105w', 'f125w', 'f160w'],
+                ['c', 'b', 'darkgreen', 'darkorange', 'r', 'darkred'],
+                ['^', '>', 'v', 's', 'd', 'o']):
             ib = np.where((sn['FILTER']==band1.upper()) &
                           (trest>-3) & (trest<1))[0]
             if len(ib) == 0:
@@ -77,16 +77,17 @@ def mk_color_curves_figure():
                          ecolor='k', elinewidth=0.5, capsize=1., mew=0.5,
                          label=band1.upper())
 
-            for band2, fillcolor in zip(['f814w', 'f125w', 'f160w'],
+            for band2, fillcolor in zip(['f814w', 'f160w'],
                                         ['darkgreen', 'r', 'darkred']):
                 if band1==band2: continue
                 if band1 in ['f140w','f160w'] and band2=='f125w': continue
                 if band2 not in maginterpdict: continue
-                if band2=='f160w':
-                    mec=color
-                    color='w'
-                else:
-                    mec='k'
+                #if band2=='f160w':
+                mec=color
+                color='w'
+                #else:
+                #    mec=color
+
 
                 slope, intercept = maginterpdict[band2][0]
                 covmatrix = maginterpdict[band2][1]
@@ -125,7 +126,7 @@ def mk_color_curves_figure():
                        ncol=1)
             pl.setp(ax2.get_yticklabels(), visible=False)
             ax2.legend(loc='lower right', fontsize='small', frameon=False,
-                       ncol=2)
+                       ncol=1, borderpad=1.3)
         else:
             ax1.legend(loc='lower right', fontsize='small', frameon=False)
             ax1.set_ylabel('AB Magnitude', labelpad=2)
@@ -134,19 +135,20 @@ def mk_color_curves_figure():
                        ncol=1, borderpad=1.8)
 
         ax2.axhline(meancolor, ls='--', lw=0.5, zorder=-1000)
-        ax2.text(1.7, meancolor+0.05, '%.1f' % np.abs(np.round(meancolor,1)),
-                 fontsize='small', ha='right', va='bottom')
+        #ax2.text(1.7, meancolor+0.05, '%.1f' % np.abs(np.round(meancolor,1)),
+        #         fontsize='small', ha='right', va='bottom')
         ax2.set_xlabel('t$_{\\rm rest}$ (days)', labelpad=5)
-        ax1.set_ylim(30.15, 26.2)
+        ax1.text(0.08, 0.92, event.upper(), ha='left', va='top',
+                 transform=ax1.transAxes, fontsize='large')
+        ax1.set_ylim(29.75, 26.2)
         ax2.set_ylim(-0.9,2.48)
-        ax1.set_xlim(-2.9,1.9)
-        ax2.set_xlim(-2.9,1.9)
+        ax1.set_xlim(-2.4,0.9)
+        ax2.set_xlim(-2.4,0.9)
         pl.setp(ax1.get_xticklabels(), visible=False)
         if event=='se':
             pl.setp(ax1.get_yticklabels(), visible=False)
-
     fig = pl.gcf()
-    fig.subplots_adjust(wspace=0, hspace=0, left=0.1, bottom=0.12,
+    fig.subplots_adjust(wspace=0, hspace=0, left=0.13, bottom=0.13,
                         right=0.97, top=0.97)
 
     return maginterpdict

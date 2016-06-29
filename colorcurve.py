@@ -1,13 +1,20 @@
 from __future__ import print_function
-from constants import (__Z__, __ABRESTBANDNAME__, __VEGARESTBANDNAME__,
-                      __MJDPKNW__, __MJDPKSE__, __THISDIR__)
-from . import lightcurve, kcorrections
+from constants import  __THISDIR__, __ABRESTBANDNAME__, __VEGARESTBANDNAME__
+from constants import __MJDPKNW__, __MJDPKSE__, __Z__
+from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
+from constants import __MJDPREPK0SE__, __MJDPOSTPK0SE__
+from . import lightcurve
+from .kcorrections import compute_kcorrection, get_linfitmag, get_kcorrection
+
 # from scipy import interpolate as scint
 from scipy import optimize as scopt
 import numpy as np
 from matplotlib import pyplot as pl
 from pytools import plotsetup
 from matplotlib import rcParams
+import os
+from astropy.io import ascii
+import sncosmo
 
 
 def mk_color_curves_figure():
@@ -358,4 +365,145 @@ def plot_colorcurve_movingbin( binsize=0.5 ):
     colortable.write( 'spock_colors.data', format='ascii.fixed_width' )
     pl.draw()
     return( colortable )
+
+
+def compute_kcorrected_colors_from_observed_data():
+    """ calculate the observed colors in rest-frame bands,
+     applying K corrections.
+    :param restphotsys:
+    :return:
+    """
+    # read in the observed spock data
+    nw, se = lightcurve.get_spock_data()
+
+    # read in the data file produced by linear fits to the pre-peak data
+    indatfile = os.path.join(__THISDIR__, 'data/magpk_trise_tfall.dat')
+    fitdat = ascii.read(indatfile, format='commented_header', header_start=-1,
+                        data_start=0)
+
+    outfile = os.path.join(__THISDIR__, 'data/observed_colors_kcorrected.dat')
+    fout = open(outfile,'w')
+    print("# event  trest c1abname c1ab c2abname c2ab  "
+          "c1veganame c1vega c2veganame c2vega ", file=fout)
+
+    # for each observed data point from -6 days to 0 days in the observer
+    # frame, get the interpolated magnitudes from the linear fits
+    # and the observed magnitudes from the light curve data
+    for event in ['nw','se']:
+        if event.lower()=='se':
+            sn = se
+            mjdpkobs = __MJDPKSE__
+            mjdprepk0, mjdpostpk0 = __MJDPREPK0SE__, __MJDPOSTPK0SE__
+            iax = 2
+        else:
+            sn = nw
+            mjdpkobs = __MJDPKNW__
+            mjdprepk0, mjdpostpk0 = __MJDPREPK0NW__, __MJDPOSTPK0NW__
+            iax = 1
+        # NOTE: the rest-frame time is always defined relative to the
+        #  *observed* MJD of peak brightness, not the assumed mjdpk
+        mjd = sn['MJD']
+        trest = (mjd-mjdpkobs)/(1+__Z__)
+        tprepk0 = (mjdprepk0-mjdpkobs)/(1+__Z__)
+        tpostpk0 = (mjdpostpk0-mjdpkobs)/(1+__Z__)
+
+        trestfit = fitdat['deltatpk']
+        mabfit = fitdat['mpk']
+        fitfilterlist = np.unique(fitdat['band'])
+        inearpeak = np.where((trest>tprepk0) & (trest<=0))[0]
+        for i in inearpeak:
+            # for each observed data point,
+            # construct a crude SED from the linear fits
+            # and this observed data point
+            obsbandname = sn['FILTER'][i].lower()
+            #if obsbandname in fitfilterlist:
+            #    continue
+
+            source_wave = []
+            source_flux = []
+
+            trest = (sn['MJD'][i] - mjdpkobs)/(1+__Z__)
+            if trest<np.min(trestfit): continue
+            if trest>np.max(trestfit): continue
+            bandpass = sncosmo.get_bandpass(obsbandname)
+            source_wave.append(bandpass.wave_eff)
+            source_flux.append(sn['MAG'][i])
+
+            ifit = np.where((np.abs(trestfit - trest) < 0.1) &
+                            (fitdat['event'] == event))[0]
+            for j in ifit:
+                bandpass = sncosmo.get_bandpass(fitdat['band'][j])
+                source_wave.append(bandpass.wave_eff)
+                source_flux.append(fitdat['mpk'][j])
+
+            isorted = np.argsort(source_wave)
+
+            source_wave = np.array(source_wave)
+            source_flux = np.array(source_flux)
+            abrestbandname = __ABRESTBANDNAME__[obsbandname]
+            vegarestbandname = __VEGARESTBANDNAME__[obsbandname]
+            abkcor = compute_kcorrection(abrestbandname, obsbandname,
+                                         __Z__, source_wave[isorted],
+                                         source_flux[isorted],
+                                         source_wave_unit='Angstrom',
+                                         source_flux_unit='magab',
+                                         obsphotsys='AB', restphotsys='AB',
+                                         verbose=False)
+
+            vegakcor = compute_kcorrection(vegarestbandname, obsbandname,
+                                         __Z__, source_wave[isorted],
+                                         source_flux[isorted],
+                                         source_wave_unit='Angstrom',
+                                         source_flux_unit='magab',
+                                         obsphotsys='AB', restphotsys='AB',
+                                         verbose=False)
+
+            # To construct a color measurement, we also need the interpolated
+            # magnitude from a redder band. We get these from the linear fits
+            # made to well sampled bands, reading in from the data file that
+            # was produced by the peak_luminosity_vs_time.py module
+            if obsbandname.lower().startswith('f1'):
+                fitbandname1 = 'f125w'
+                fitbandname2 = 'f160w'
+            else:
+                fitbandname1 = 'f435w'
+                fitbandname2 = 'f814w'
+            m1fit = get_linfitmag(event, fitbandname1, trest)
+            m2fit = get_linfitmag(event, fitbandname2, trest)
+
+            # now we get the K corrections to convert from the observer-frame
+            # band to the rest-frame band and the AB or Vega system
+            kcor1vega = get_kcorrection(event, fitbandname1, trest, restphotsys='Vega')
+            kcor2vega = get_kcorrection(event, fitbandname1, trest, restphotsys='Vega')
+            kcor1ab = get_kcorrection(event, fitbandname1, trest, restphotsys='AB')
+            kcor2ab = get_kcorrection(event, fitbandname1, trest, restphotsys='AB')
+
+            fitbandname1restAB = __ABRESTBANDNAME__[fitbandname1]
+            fitbandname2restAB = __ABRESTBANDNAME__[fitbandname2]
+
+            fitbandname1restVega = __VEGARESTBANDNAME__[fitbandname1]
+            fitbandname2restVega = __VEGARESTBANDNAME__[fitbandname2]
+
+
+            # Here is the observed magnitude in the bluer band
+            mobs = sn['MAG'][i]
+
+            # now we can compute the AB or Vega color in rest-frame band passes
+            cab1 = (mobs + abkcor) - (m1fit + kcor1ab)
+            cab2 = (mobs + abkcor) - (m2fit + kcor2ab)
+            cvega1 = (mobs + vegakcor) - (m1fit + kcor1vega)
+            cvega2 = (mobs + vegakcor) - (m2fit + kcor2vega)
+
+            obscolorname1 = '%s-%s' % (obsbandname.lower(), fitbandname1)
+            obscolorname2 = '%s-%s' % (obsbandname.lower(), fitbandname2)
+            abcolorname1 = '%s-%s'%(abrestbandname[4:], fitbandname1restAB[4:])
+            abcolorname2 = '%s-%s'%(abrestbandname[4:], fitbandname2restAB[4:])
+            vegacolorname1 = '%s-%s'%(vegarestbandname[7:], fitbandname1restVega[7:])
+            vegacolorname2 = '%s-%s'%(vegarestbandname[7:], fitbandname2restVega[7:])
+
+            print("%s %.1f  %4s  %6.1f  %4s  %6.1f  %4s  %6.1f  %4s  %6.1f  " % (
+                event, trest, abcolorname1, cab1, abcolorname2, cab2,
+                vegacolorname1, cvega1, vegacolorname2, cvega2), file=fout)
+    fout.close()
+
 

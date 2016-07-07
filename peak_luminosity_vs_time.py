@@ -221,71 +221,107 @@ def plot_ps1_fast_transients(
                      color=color, ls=' ', marker='o', ms=8)
 
 
-def plot_classical_novae(declinetimemetric='t2', marker='D'):
+def plot_classical_novae(declinetimemetric='t2', marker='D',
+                         downes2000=True, shafter2011=True,
+                         kasliwal2011=True, czekala2013=True):
     """ Plot squares for the classical novae from the MW and M31,
-    using data from Downes & Duerbeck 2000
-    :param declinetimemetric:
+    using data from Downes & Duerbeck 2000, Shafter 2011, Kasliwal 2011,
+    and Czekala 2013
+
+    :param declinetimemetric: t2, t3, or t1/2
     :return:
     """
 
-    downesdatfile = os.path.join(__THISDIR__,"data/downes2000_table5.dat")
-    indat = ascii.read(downesdatfile,
-                       format='commented_header', header_start=-1,
-                       data_start=0)
-    t3 = indat['t3']
-    MV = indat['MVmax']
-    errMV = indat['e_MVmax']
-    wave_eff = 5500
-    logLV = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MV)
-    logLVerr = 0.4*errMV
-    if declinetimemetric=='t3':
-        tdecline = t3
-    elif declinetimemetric=='t2':
-        tdecline = t3 * (2 / 3.)
-    elif declinetimemetric=='t1/2':
-        tdecline = t3 / (3 / (2.5*np.log10(2.)))
-    else:
-        raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
-    pl.plot(tdecline , logLV,  marker=marker, mec='k',
-            color='darkcyan', ls=' ', ms=8, label='_Downes & Duerbeck 2000')
-
-    # 3 very bright Classical novae from Czekala et al 2013
-    for label, MV, errMV, t2, errt2 in zip(
-            ['_L91', '_M31N-2007-11d', '_SN 2010U'],
-            [-10, -9.5, -10.2],
-            [0.1, 0.1, 0.1],
-            [6, 9.5, 3.5],
-            [0.5, 0.5, 0.3]):
+    if downes2000:
+        downesdatfile = os.path.join(__THISDIR__,"data/downes2000_table5.dat")
+        indat = ascii.read(downesdatfile,
+                           format='commented_header', header_start=-1,
+                           data_start=0)
+        t3 = indat['t3']
+        MV = indat['MVmax']
+        errMV = indat['e_MVmax']
         wave_eff = 5500
         logLV = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MV)
-        logLVerr = 0.4 * errMV
+        logLVerr = 0.4*errMV
         if declinetimemetric=='t3':
-            tdecline = t2  * (3. / 2.)
+            tdecline = t3
         elif declinetimemetric=='t2':
-            tdecline = t2
+            tdecline = t3 * (2 / 3.)
         elif declinetimemetric=='t1/2':
-            tdecline = t2 / (2 / (2.5*np.log10(2.)))
+            tdecline = t3 / (3 / (2.5*np.log10(2.)))
         else:
-            raise exceptions.RuntimeError(
-                "decline time must be t2, t3, or t1/2")
+            raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
+        pl.plot(tdecline , logLV,  marker=marker, mec='k',
+                color='darkcyan', ls=' ', ms=8, label='_Downes & Duerbeck 2000')
 
-        pl.errorbar(tdecline, logLV, # logLVerr, errt2,
-                    marker=marker, mec='k',
-                    color='darkcyan', ls=' ', ms=8, label=label)
+    if czekala2013:
+        # 3 very bright Classical novae from Czekala et al 2013
+        for label, MV, errMV, t2, errt2 in zip(
+                ['_L91', '_M31N-2007-11d', '_SN 2010U'],
+                [-10, -9.5, -10.2],
+                [0.1, 0.1, 0.1],
+                [6, 9.5, 3.5],
+                [0.5, 0.5, 0.3]):
+            wave_eff = 5500
+            logLV = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MV)
+            logLVerr = 0.4 * errMV
+            if declinetimemetric=='t3':
+                tdecline = t2  * (3. / 2.)
+            elif declinetimemetric=='t2':
+                tdecline = t2
+            elif declinetimemetric=='t1/2':
+                tdecline = t2 / (2 / (2.5*np.log10(2.)))
+            else:
+                raise exceptions.RuntimeError(
+                    "decline time must be t2, t3, or t1/2")
 
-    # Kasliwal 2011
-    Mg = np.array([-9.0, -8.5, -9.9, -7.5, -8.7, -8.0, -10.7, -7.6, -8.5,
-                   -7.8, -6.8, -7.6, -8.5, -7.8, -7.0, -5.1, -6.3, -7.5,
-                   -6.5, -7.7])
-    t2 = np.array([6, 3.3, 10.9, 24.6, 6, 23, 8, 8, 14, 16.6, 16.0, 12.0,
-                   16.2, 2.0, 8.6, 8, 5, 26.3, 12.3, 7.5])
-    tlowlims = np.array([1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,0, 0, 0,
-                         1, 1, 0, 0, 0])
-    terr = tlowlims
-    wave_eff = 4718.0
-    logLg = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * Mg)
-    pl.errorbar(t2, logLg, xlolims=tlowlims, marker=marker, mec='k',
-                color='darkgreen', ls=' ', ms=8, label='_Kasliwal+ 2011')
+            pl.errorbar(tdecline, logLV, # logLVerr, errt2,
+                        marker=marker, mec='k',
+                        color='darkorange', ls=' ', ms=8, label=label)
+
+    if kasliwal2011:
+        # Kasliwal+ 2011
+        Mg = np.array([-7.5, -8.7, -10.7, -7.6, -8.5, -7.8, -6.8, -7.6, -8.5,
+                       -7.8, -7., -7.5, -6.5, -7.7])
+        t2 = np.array([24.6, 6., 8., 8., 14., 16.6, 16, 12., 16.2, 2., 8.6,
+                       26.3, 12.3, 7.5])
+        wave_eff = 4718.0
+        logLg = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * Mg)
+        pl.errorbar(t2, logLg, marker=marker, mec='k',
+                    color='darkgreen', ls=' ', ms=8, label='_Kasliwal+ 2011')
+
+    if shafter2011:
+        datfile = os.path.join(__THISDIR__,"data/shafter2011_table6.dat")
+        indat = ascii.read(datfile,
+                           format='commented_header', header_start=-1,
+                           data_start=0)
+
+        for band,bandname,plotcolor in zip(
+                ['B','V','R','darkred'],
+                ['bessellb','bessellv','bessellr','sdssr'],
+                ['b','darkcyan','darkorange','r']):
+            wave_eff = sncosmo.get_bandpass(bandname).wave_eff
+            iband = np.where(indat['Filter'] == band)
+            M = indat['Mmax'][iband]
+            errM = indat['errMmax'][iband]
+            t2 = indat['t2'][iband]
+            errt2 = indat['errt2'][iband]
+            logL = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * M)
+            logLerr = 0.4 * errM
+            if declinetimemetric == 't3':
+                tdecline = t2 * (3 / 2.)
+            elif declinetimemetric == 't2':
+                tdecline = t2
+            elif declinetimemetric == 't1/2':
+                tdecline = t2 / (2 / (2.5 * np.log10(2.)))
+            else:
+                raise exceptions.RuntimeError(
+                    "decline time must be t2, t3, or t1/2")
+            #pl.errorbar(tdecline, logL, yerr=logLerr, xerr=errt2,
+            pl.plot(tdecline, logL,
+                    marker=marker, mec='k', color=plotcolor,
+                    ls=' ', ms=8, label='_Shafter+ 2011')
+
     return
 
 
@@ -402,7 +438,7 @@ def plot_mmrd(declinetimemetric='t2', livio92=True,
 
     if livio92:
         # Livio 1992
-        MB = np.arange(-10, -8.5, 0.01)
+        MB = np.arange(-10, -7.5, 0.01)
         t3_livio92 = 51.3 * 10**((MB+9.76)/10) * (
             10**(2*(MB+9.76)/30) - 10**(-2*(MB+9.76)/30))**1.5
         logL_livio92 = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MB)
@@ -448,7 +484,8 @@ def plot_mmrd(declinetimemetric='t2', livio92=True,
     return
 
 
-def mk_figure(mumin=10, mumax=100, declinetimemetric='t2', plotrisetime=False):
+def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
+                              plotrisetime=False):
     """ Read in the data file giving apparent magnitude vs time inferred from
     the linear fits to four observed bands.  Read in the data file giving the
     K correction as a function of time for converting each observed HST band
@@ -518,12 +555,6 @@ def mk_figure(mumin=10, mumax=100, declinetimemetric='t2', plotrisetime=False):
         fig.subplots_adjust(left=0.16, right=0.97, bottom=0.16, top=0.97,
                             wspace=0)
 
-    ax1.set_ylabel('log(L$_{\\rm pk}$ [erg/s])')
-    if declinetimemetric=='t3':
-        ax2.set_xlabel('t$_{3}$: time to decline by 3 mag (days)')
-    elif declinetimemetric=='t2':
-        ax2.set_xlabel('t$_{2}$: time to decline by 2 mag (days)')
-
     plot_mmrd(declinetimemetric=declinetimemetric,
               livio92=True,  dellavalle95=True)
     # plot_yaron2005_models(declinetimemetric=declinetimemetric)
@@ -551,9 +582,25 @@ def mk_figure(mumin=10, mumax=100, declinetimemetric='t2', plotrisetime=False):
     #         fontsize='medium', color='k')
     ax2.legend(loc='upper right', fontsize='small', handlelength=1.5)
 
-    ax2.set_xlim(-0.2,15.2)
+    ax2.set_xlim(0.01, 15.2)
     ax2.set_ylim(37.5, 43.5)
-    # ax2.semilogx()
+
+    # make the M_V axis on the right side
+    MV = lambda logL: -2.5*(logL - np.log10(__cL0__ / 5500) - 40)
+    logLlim = ax2.get_ylim()
+    ax2right = ax2.twinx()
+    ax2right.set_ylim(MV(logLlim[0]), MV(logLlim[1]))
+
     pl.setp(ax2.get_xticklabels()[0], visible=False)
+
+    ax1.set_ylabel('log(L$_{\\rm pk}$ [erg/s])', labelpad=0)
+    if declinetimemetric=='t3':
+        ax2.set_xlabel('t$_{3}$: time to decline by 3 mag (days)')
+    elif declinetimemetric=='t2':
+        ax2.set_xlabel('t$_{2}$: time to decline by 2 mag (days)')
+    ax2right.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
+
+    fig.subplots_adjust(left=0.16, bottom=0.15,
+                        right=0.83, top=0.97)
     pl.draw()
 

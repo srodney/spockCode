@@ -8,7 +8,9 @@ from . import lightcurve
 from scipy import interpolate as scint
 from scipy import optimize as scopt
 import numpy as np
-from matplotlib import pyplot as pl
+from matplotlib import pyplot as pl, ticker
+import matplotlib.transforms as mtransforms
+from matplotlib.patches import Ellipse, FancyBboxPatch, Rectangle
 from pytools import plotsetup, cosmo
 from astropy.io import ascii
 import sncosmo
@@ -17,9 +19,22 @@ import sys
 import os
 import exceptions
 
+
+def draw_bbox(ax, bb):
+    # boxstyle=square with pad=0, i.e. bbox itself.
+    p_bbox = FancyBboxPatch((bb.xmin, bb.ymin),
+                            abs(bb.width), abs(bb.height),
+                            boxstyle="square,pad=0.",
+                            ec="k", fc="none", zorder=10.,
+                            )
+    ax.add_patch(p_bbox)
+
+
 # constant combining the speed of light with the standard
 # luminosity factor to convert from AB mags to Luminosity in erg/s
 __cL0__ = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
+MVfromLogL = lambda logL: -2.5*(logL - np.log10(__cL0__ / 5500) - 40)
+logLfromMV = lambda MV: np.log10(__cL0__ / 5500) + 40 - (0.4 * MV)
 
 
 __THISFILE__ = sys.argv[0]
@@ -424,14 +439,17 @@ def plot_yaron2005_models(
     pl.plot(tdecline, logLmax, marker='o', ls=' ', ms=8, color='k', mfc='w')
 
 
-def plot_mmrd(declinetimemetric='t2', livio92=True,
-              dellavalle95=True):
+def plot_mmrd(ax=None, declinetimemetric='t2', livio92=True,
+              dellavalle95=True, tmax=15):
     """ plot the traditional peak luminosity vs decline time
     (i.e. the Max Mag vs Rate of Decline  (MMRD) relation)
     from Della Valle and Livio 1995 or Downes and Duerbeck 2000.
     i.e. the theoretical
     :return:
     """
+    if ax is None:
+        ax = pl.gca()
+
     # constant combining the speed of light with the standard
     # luminosity factor to convert from AB mags to Luminosity in erg/s
     wave_eff = 5488.9 # V band wavelength in Angstroms
@@ -451,14 +469,14 @@ def plot_mmrd(declinetimemetric='t2', livio92=True,
             tdecline = t3_livio92 / (3 / (2.5*np.log10(2.)))
         else:
             raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
-        pl.plot(tdecline, logL_livio92, color='k', ls='--',
+        ax.plot(tdecline, logL_livio92, color='k', ls='--',
                 label='Livio 1992')
 
     if dellavalle95:
         # Cappaccioli 1990 or Della Valle and Livio 1995:
         # Mv = -7.92 - 0.81 arctan( (1.32 - log10( t2 ))/0.23 )
         # uncertainty is ~ +-0.5
-        t2 = np.arange(0.01,16,0.05)
+        t2 = np.arange(0.01,tmax,0.05)
         MV_max = 0.45 - 7.92 - 0.81 * np.arctan((1.32 - np.log10(t2))/0.23)
         MV_min = -0.65 - 7.92 - 0.81 * np.arctan((1.32 - np.log10(t2))/0.23)
         logLmax = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MV_min)
@@ -472,7 +490,7 @@ def plot_mmrd(declinetimemetric='t2', livio92=True,
         else:
             raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
 
-        pl.fill_between(tdecline, logLmin, logLmax, color='k', alpha=0.5)
+        ax.fill_between(tdecline, logLmin, logLmax, color='k', alpha=0.5)
 
     if False:
         # Downes and Duerbeck:
@@ -480,31 +498,34 @@ def plot_mmrd(declinetimemetric='t2', livio92=True,
         MV_dd = -8.02 - 1.23 * np.arctan((1.32 - np.log10(t2))/0.23)
         logL_dd = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MV_dd)
 
-        pl.plot(tdecline, logL_dd, color='k', alpha=0.5)
+        ax.plot(tdecline, logL_dd, color='k', alpha=0.5)
     return
 
-
-def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
-                              plotrisetime=False):
-    """ Read in the data file giving apparent magnitude vs time inferred from
-    the linear fits to four observed bands.  Read in the data file giving the
-    K correction as a function of time for converting each observed HST band
-    into the nearest rest-frame filter.  For each assumed time of peak,
-    convert the extrapolated apparent mag at peak to the peak absolute
-    magnitude.  Then convert this absolute magnitude to Luminosity in erg/s
-
+import sncosmo
+def plot_typeIa_sne(ax=None):
+    """ make a crude representation of the Phillips relation
+    :param ax:
     :return:
     """
-    if plotrisetime:
-        fig = plotsetup.fullpaperfig(figsize=[8, 3.5])
-        fig.clf()
-        ax1 = fig.add_subplot(1,2,1)
-        ax2 = fig.add_subplot(1,2,2, sharey=ax1)
-    else:
-        fig = plotsetup.halfpaperfig(figsize=[4, 4])
-        fig.clf()
-        ax2 = fig.add_subplot(1,1,1)
-        ax1 = ax2
+    if ax is None:
+        ax = pl.gca()
+    MVmax = -16.5
+    MVmin = -19.65
+    t2min = 25
+    t2max = 50
+    t2 = [t2min, t2max]
+    MV = np.array([MVmax, MVmin])
+    MVtop = MV - 0.3
+    MVbottom = MV + 0.3
+    ax.fill_between(t2, logLfromMV(MVtop), logLfromMV(MVbottom),
+                    color='k', alpha=0.3)
+    return
+
+def plot_spock(ax1, ax2=None, mumin=10, mumax=100, declinetimemetric='t2',
+               plotrisetime=False):
+
+    if ax2 is None:
+        ax2 = ax1
 
     magdatfile = os.path.join(__THISDIR__,'data/magpk_trise_tfall_kcor_ab.dat')
     indat = ascii.read(magdatfile, format='commented_header',
@@ -544,6 +565,31 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
         ax2.fill_between(tdecline, logLmin, logLmax,
                          color=c, alpha=0.3, label=label)
 
+
+
+def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
+                              plotrisetime=False):
+    """ Read in the data file giving apparent magnitude vs time inferred from
+    the linear fits to four observed bands.  Read in the data file giving the
+    K correction as a function of time for converting each observed HST band
+    into the nearest rest-frame filter.  For each assumed time of peak,
+    convert the extrapolated apparent mag at peak to the peak absolute
+    magnitude.  Then convert this absolute magnitude to Luminosity in erg/s
+
+    :return:
+    """
+    if plotrisetime:
+        fig = plotsetup.fullpaperfig(figsize=[8, 3.5])
+        fig.clf()
+        ax1 = fig.add_subplot(1,2,1)
+        ax2 = fig.add_subplot(1,2,2, sharey=ax1)
+    else:
+        fig = plotsetup.halfpaperfig(figsize=[4, 4])
+        fig.clf()
+        ax2 = fig.add_subplot(1,1,1)
+        ax1 = ax2
+
+
     if plotrisetime:
         ax1.set_xlabel('t$_{\\rm rise}$: max rise time from 0 flux (days)')
         pl.setp(ax2.get_yticklabels(), visible=False)
@@ -554,6 +600,9 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     else:
         fig.subplots_adjust(left=0.16, right=0.97, bottom=0.16, top=0.97,
                             wspace=0)
+
+    plot_spock(ax1, ax2, mumin=mumin, mumax=mumax,
+               declinetimemetric=declinetimemetric, plotrisetime=plotrisetime)
 
     plot_mmrd(declinetimemetric=declinetimemetric,
               livio92=True,  dellavalle95=True)
@@ -599,6 +648,105 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     elif declinetimemetric=='t2':
         ax2.set_xlabel('t$_{2}$: time to decline by 2 mag (days)')
     ax2right.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
+
+    fig.subplots_adjust(left=0.16, bottom=0.15,
+                        right=0.83, top=0.97)
+    pl.draw()
+
+
+def mk_sn_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2'):
+    """ Plot a wide range of peak luminosities vs decline times
+    :return:
+    """
+    fig = plotsetup.halfpaperfig(figsize=[4, 4])
+    fig.clf()
+    ax = fig.add_subplot(1,1,1)
+    ax2 = ax.twinx()
+
+    plot_spock(ax, ax2=None, mumin=mumin, mumax=mumax,
+               declinetimemetric=declinetimemetric, plotrisetime=False)
+
+    plot_mmrd(ax, declinetimemetric=declinetimemetric, livio92=False,
+              dellavalle95=True, tmax=110)
+    plot_typeIa_sne(ax)
+    ax2.text(85, -18.5, 'Type Ia SNe', rotation=53,
+             ha='center', va='center',
+             fontsize='small', color='k', zorder=1000)
+
+    ax.text(0.6, 42.3, 'HFF14Spo', ha='left', va='top',
+             fontsize='small', color='k', rotation=-20)
+    ax.text(9, 38.7, 'Novae', ha='right', va='top',
+             fontsize='small', color='k')
+
+    ax.set_xlim(0.5,110)
+    ax.set_ylim(logLfromMV(-5.2), logLfromMV(-24.5))
+    ax.set_xscale('log')
+
+
+    # make the M_V axis on the right side
+    logLlim = ax.get_ylim()
+    ax2.set_xlim(0.5,110)
+    ax2.set_ylim(MVfromLogL(logLlim[0]), MVfromLogL(logLlim[1]))
+
+    pl.setp(ax.get_xticklabels()[0], visible=False)
+
+    ax.set_ylabel('log(L$_{\\rm pk}$ [erg/s])', labelpad=0)
+    ax.set_xlabel('t$_2$ : time to decline by 2 mag (days)')
+    ax2.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
+
+    ax.yaxis.tick_left()
+
+    ps1ft = Ellipse(xy=(67,-18.5), width=25, height=3, angle=0,
+                    facecolor='b', alpha=0.3)
+    #ax2.text(67, -18.5, 'Fast\nOptical\nTransients',
+    ax2.text(54, -19, 'Fast Optical\nTransients',
+             ha='right', va='bottom',
+             fontsize='small', color='darkblue')
+
+    crt = Ellipse(xy=(78,-14), width=25, height=5, angle=0,
+                  facecolor='darkorange', alpha=0.5, zorder=30)
+    ax2.text(78, -14, 'Ca-Rich\nTransients',
+             ha='center', va='center',
+             fontsize='small', color='k')
+
+    lrn = Ellipse(xy=(97,-10.3), width=30, height=7, angle=0,
+                  facecolor='darkred', alpha=0.3, zorder=40)
+    ax2.text(97, -10.3, 'Luminous\nRed\nNovae', ha='center', va='center',
+             fontsize='small', color='darkred')
+
+    ccsn = Rectangle(xy=(75,-20), width=35, height=6, angle=0,
+                     facecolor='darkcyan', alpha=0.3, zorder=20)
+    ax2.text(98, -16.5, 'Core\nCollapse\nSNe', ha='center', va='center',
+             fontsize='small', color='darkcyan')
+
+    slsn = Rectangle(xy=(90,-23), width=30, height=2, angle=0,
+                     facecolor='darkorchid', alpha=0.3)
+    ax2.text(88, -22, 'Superluminous\nSupernovae',
+             ha='right', va='center',
+             fontsize='small', color='darkorchid')
+
+    ptIa = Ellipse(xy=(58,-16.5), width=30, height=3, angle=0,
+                   facecolor='w', ls='dashed', edgecolor='k',
+                   zorder=40, alpha=0.3)
+    ax2.text(58, -16.5, '.Ia', ha='center', va='center',
+             fontsize='small', color='k', zorder=1000)
+
+    #kNe = Ellipse(xy=(38,-14.), width=40, height=3, angle=0,
+    #               facecolor='w', ls='dashed', edgecolor='k',
+    #               zorder=40, alpha=0.3)
+    kNe = Rectangle(xy=(9,-14), width=50, height=3, angle=0,
+                    facecolor='w', ls='dashed', edgecolor='k',
+                    alpha=0.3)
+    ax2.text(35, -12, 'Kilonovae', ha='center', va='center',
+             fontsize='small', color='k', zorder=1000)
+
+    for shape in [ps1ft, crt, lrn, ccsn, slsn, ptIa, kNe]:
+        ax2.add_artist(shape)
+
+
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax2.yaxis.set_major_locator(ticker.MultipleLocator(4))
+    ax2.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
     fig.subplots_adjust(left=0.16, bottom=0.15,
                         right=0.83, top=0.97)

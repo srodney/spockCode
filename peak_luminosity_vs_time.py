@@ -8,9 +8,10 @@ from . import lightcurve
 from scipy import interpolate as scint
 from scipy import optimize as scopt
 import numpy as np
-from matplotlib import pyplot as pl, ticker
+from matplotlib import pyplot as pl, ticker, rcParams
 import matplotlib.transforms as mtransforms
-from matplotlib.patches import Ellipse, FancyBboxPatch, Rectangle
+from matplotlib.patches import (Ellipse, FancyBboxPatch, Rectangle,
+                                FancyArrowPatch)
 from pytools import plotsetup, cosmo
 from astropy.io import ascii
 import sncosmo
@@ -521,6 +522,41 @@ def plot_typeIa_sne(ax=None):
                     color='k', alpha=0.3)
     return
 
+def plot_kn_candidates(ax=None):
+    """ plot limits for two kilonova candidates
+    :return:
+    """
+    if ax == None:
+        ax = pl.gca()
+
+    # perley+ 2009
+    logLpk = 41.2
+    t2min = 6
+    ax.plot(t2min, logLpk, marker='|', color='darkgreen',
+            ms=rcParams['lines.markersize']*1.5)
+    arr = FancyArrowPatch( [t2min, logLpk], [t2min+2,logLpk],
+                           arrowstyle='-|>', mutation_scale=25,
+                           fc='darkgreen', ls='solid')
+    ax.add_patch(arr)
+
+    # Berger+2013, Tanvir+2013
+    zkn = 0.356
+    mABpk = 20.5
+    MABpk = mABpk - cosmo.mu(zkn) - 2.5 * np.log10(1 + zkn)
+
+    logLpkmin = logLfromMV(MABpk)
+    t2 = 0.578
+    ax.plot(t2, logLpkmin, marker='_', color='darkblue',
+            ms=rcParams['lines.markersize']*1.5)
+
+    arr2 = FancyArrowPatch([t2, logLpkmin], [t2, logLpkmin+0.7],
+                           arrowstyle='-|>', mutation_scale=25,
+                           fc='darkblue', ls='solid')
+    ax.add_patch(arr2)
+
+
+
+
 def plot_spock(ax1, ax2=None, mumin=10, mumax=100, declinetimemetric='t2',
                plotrisetime=False):
 
@@ -609,12 +645,17 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     # plot_yaron2005_models(declinetimemetric=declinetimemetric)
     plot_classical_novae(declinetimemetric=declinetimemetric, marker='D')
     plot_recurrent_novae(declinetimemetric=declinetimemetric, marker='o')
+    plot_kn_candidates(ax1)
+
     mmrd = ax2.plot(-1, -1, ls='-', marker=' ', lw=5, alpha=0.5,
                     color='k', label='della Valle & Livio 1995')
     RNe = ax2.plot(-1, -1, ls=' ', marker='o', mfc='w', mec='k', ms=10,
                    label='Recurrent Novae')
     CNe = ax2.plot(-1, -1, ls=' ', marker='D', mfc='w', mec='k', ms=10,
                    label='Classical Novae')
+    KNe = ax2.plot(-1, -1, ls='-', marker='>', mfc='w',
+                   color='k', mec='k', ms=10,
+                   label='Kilonova Candidates')
 
     #plot_ps1_fast_transients(ax1, ax2, plotrisetime=plotrisetime,
     #                         declinetimemetric=declinetimemetric)
@@ -624,15 +665,15 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     #ax2.text(13.5, 41.8, 'Fast Transients', ha='right', va='top',
     #         fontsize='medium')
 
-    ax2.text(6, 41.8, 'HFF14Spo', ha='right', va='top',
-             fontsize='medium', color='k', rotation=-20)
+    ax2.text(5, 42.0, 'HFF14Spo', ha='right', va='top',
+             fontsize='medium', color='k', rotation=-32)
 
     #ax2.text(13, 38.2, 'Novae', ha='right', va='top',
     #         fontsize='medium', color='k')
     ax2.legend(loc='upper right', fontsize='small', handlelength=1.5)
 
     ax2.set_xlim(0.01, 15.2)
-    ax2.set_ylim(37.5, 43.5)
+    ax2.set_ylim(37.5, 44.5)
 
     # make the M_V axis on the right side
     MV = lambda logL: -2.5*(logL - np.log10(__cL0__ / 5500) - 40)
@@ -654,7 +695,8 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     pl.draw()
 
 
-def mk_sn_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2'):
+def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
+                            declinetimemetric='t2'):
     """ Plot a wide range of peak luminosities vs decline times
     :return:
     """
@@ -663,8 +705,11 @@ def mk_sn_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2'):
     ax = fig.add_subplot(1,1,1)
     ax2 = ax.twinx()
 
-    plot_spock(ax, ax2=None, mumin=mumin, mumax=mumax,
-               declinetimemetric=declinetimemetric, plotrisetime=False)
+    if showspock:
+        plot_spock(ax, ax2=None, mumin=mumin, mumax=mumax,
+                   declinetimemetric=declinetimemetric, plotrisetime=False)
+        ax.text(0.6, 42.3, 'HFF14Spo', ha='left', va='top',
+                fontsize='small', color='k', rotation=-20)
 
     plot_mmrd(ax, declinetimemetric=declinetimemetric, livio92=False,
               dellavalle95=True, tmax=110)
@@ -673,8 +718,6 @@ def mk_sn_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2'):
              ha='center', va='center',
              fontsize='small', color='k', zorder=1000)
 
-    ax.text(0.6, 42.3, 'HFF14Spo', ha='left', va='top',
-             fontsize='small', color='k', rotation=-20)
     ax.text(9, 38.7, 'Novae', ha='right', va='top',
              fontsize='small', color='k')
 
@@ -705,7 +748,7 @@ def mk_sn_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2'):
 
     crt = Ellipse(xy=(78,-14), width=25, height=5, angle=0,
                   facecolor='darkorange', alpha=0.5, zorder=30)
-    ax2.text(78, -14, 'Ca-Rich\nTransients',
+    ax2.text(78, -14, 'Ca-Rich\nSNe',
              ha='center', va='center',
              fontsize='small', color='k')
 

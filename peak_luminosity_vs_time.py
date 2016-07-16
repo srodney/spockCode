@@ -8,17 +8,28 @@ from . import lightcurve
 from scipy import interpolate as scint
 from scipy import optimize as scopt
 import numpy as np
-from matplotlib import pyplot as pl, ticker, rcParams
+from matplotlib import pyplot as pl, ticker, rcParams, cm
 import matplotlib.transforms as mtransforms
 from matplotlib.patches import (Ellipse, FancyBboxPatch, Rectangle,
                                 FancyArrowPatch)
 from pytools import plotsetup, cosmo
 from astropy.io import ascii
 import sncosmo
-
 import sys
 import os
 import exceptions
+
+# constant combining the speed of light with the standard luminosity factor
+# to convert from V band AB mags to Luminosity in erg/s
+__cL0__ = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
+MVfromLogL = lambda logL: -2.5*(logL - np.log10(__cL0__ / 5500) - 40)
+logLfromMV = lambda MV: np.log10(__cL0__ / 5500) + 40 - (0.4 * MV)
+
+__THISFILE__ = sys.argv[0]
+if 'ipython' in __THISFILE__:
+    __THISFILE__ = __file__
+__THISDIR__ = os.path.abspath(os.path.dirname(__THISFILE__))
+
 
 
 def draw_bbox(ax, bb):
@@ -30,18 +41,6 @@ def draw_bbox(ax, bb):
                             )
     ax.add_patch(p_bbox)
 
-
-# constant combining the speed of light with the standard
-# luminosity factor to convert from AB mags to Luminosity in erg/s
-__cL0__ = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
-MVfromLogL = lambda logL: -2.5*(logL - np.log10(__cL0__ / 5500) - 40)
-logLfromMV = lambda MV: np.log10(__cL0__ / 5500) + 40 - (0.4 * MV)
-
-
-__THISFILE__ = sys.argv[0]
-if 'ipython' in __THISFILE__:
-    __THISFILE__ = __file__
-__THISDIR__ = os.path.abspath(os.path.dirname(__THISFILE__))
 
 def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
                             figsize='tall', declinetimemetric='t2'):
@@ -341,7 +340,9 @@ def plot_classical_novae(declinetimemetric='t2', marker='D',
     return
 
 
-def plot_recurrent_novae(declinetimemetric='t2', marker='o'):
+def plot_recurrent_novae(timemetric='t2', luminositymetric='Lpk',
+                         marker='d', color='k',
+                         plotbands = 'gBVR', ax=None):
     """
     plot the peak luminosity vs decline time for recurrent novae,
     using data from Schaefer 2010
@@ -351,84 +352,135 @@ def plot_recurrent_novae(declinetimemetric='t2', marker='o'):
         [-7.0, -6.7, -7.6, -7.3, -8.4, -8.8, -7.7, -10.8, -8.1, -9.0])
     MV = np.array(
         [-7.1, -6.6, -7.1, -7.4, -8.5, -8.4, -7.6, -10.6, -8.2, -8.9])
+    AmpV = np.array(
+        [9.1, 9.8, 7.7, 8.2, 10.1, 11.2, 7.3, 6.2, 9.2, 7.4])
+    AmpB = np.array(
+        [8.9, 10.2, 8.0, 8.2, 10.3, 12.0, 7.9, 6.9, 9.5, 7.4])
+
     id = ['T Pyx', 'IM Nor', 'CI Aql',
           'V2487 Oph', 'U Sco', 'V394 CrA', 'T CrB',
           'RS Oph', 'V745 Sco', 'V3890 Sgr']
-    trec = np.array([19, 82, 24, 18, 10.3, 30, 80, 14.7, 21, 25])
+    trec_yrs = np.array([19, 82, 24, 18, 10.3, 30, 80, 14.7, 21, 25])
     t3 = np.array([62, 80.0, 31.6, 8.4, 2.6, 5.2, 6.0, 14.0, 9.0, 14.4])
     t2 = np.array([32, 50.0, 25.4, 6.2, 1.2, 2.4, 4.0, 6.8, 6.2, 6.4])
 
+    if ax is None:
+        ax = pl.gca()
+    if timemetric== 't2':
+        t = t2
+    elif timemetric== 't3':
+        t = t3
+    elif timemetric== 't3':
+        t = t3
+    elif timemetric == 'Prec' or timemetric == 'trec':
+        t = np.log10(trec_yrs)
+    else:
+        raise exceptions.RuntimeError('decline time must be t2, t3, or t1/2')
+
     wave_effV = 5500
     logLV = np.log10(__cL0__ / wave_effV) + 40 - (0.4 * MV)
-
     wave_effB = 4385
     logLB = np.log10(__cL0__ / wave_effB) + 40 - (0.4 * MB)
 
-    ax = pl.gca()
-    if declinetimemetric=='t2':
-        tdecline = t2
-    elif declinetimemetric=='t3':
-        tdecline = t3
-    else:
-        raise exceptions.RuntimeError('decline time must be t2, t3, or t1/2')
-    ax.plot(tdecline, logLV, marker=marker, color='darkcyan', ls=' ', ms=8)
-    ax.plot(tdecline, logLB, marker=marker, color='blue', ls=' ', ms=8)
+    if luminositymetric=='Lpk':
+        yV = logLV
+        yB = logLB
+    elif luminositymetric.startswith('Amp'):
+        yV = AmpV
+        yB = AmpB
+
+    if 'V' in plotbands:
+        ax.plot(t, yV, marker=marker, color='k', ls=' ', ms=8)
+    if 'B' in plotbands:
+        ax.plot(t, yB, marker=marker, color='blue', ls=' ', ms=8)
 
     # 2014 eruption of the fast-recurrence nova M31N-2008-12a
     # Darnley et al 2015
-    t3V = 3.8 # Darnley et al. 2015, Table 5
-    # mV = 18.5 # +- 0.1 Hornoch et al 2014, Darnley et al 2015
-    MV = 18.5 - 0.7 - 24.4
-    t3R = 4.8 # Darnley et al. 2015, Table 5
-    MR = -6.6 # Tang et al. 2014 (abstract)
-    wave_eff = 5550 # g band wavelength in Angstroms
-    logLV = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MV)
-    if declinetimemetric=='t3':
-        tdecline = t3V
-    elif declinetimemetric=='t2':
-        tdecline = t3V * (2. / 3.)
-    elif declinetimemetric=='t1/2':
-        tdecline = t3V / (3 / (2.5*np.log10(2.)))
-    else:
-        raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
-    pl.plot(tdecline, logLV, marker=marker, color='darkcyan', ms=12,
-            label='_M31N-2008-12a (V)')
-    wave_eff = 6670 # R band wavelength in Angstroms
-    logLR = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MR)
-    if declinetimemetric=='t3':
-        tdecline = t3R
-    elif declinetimemetric=='t2':
-        tdecline = t3R * (2 / 3.)
-    elif declinetimemetric=='t1/2':
-        tdecline = t3R / (3 / (2.5*np.log10(2.)))
-    else:
-        raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
-    pl.plot(tdecline, logLR, marker=marker, color='darkorange', ms=12,
-            label='_M31N-2008-12a (R)')
+    if 'V' in plotbands:
+        t3V = 3.8 # Darnley et al. 2015, Table 5
+        # mV = 18.5 # +- 0.1 Hornoch et al 2014, Darnley et al 2015
+        # convert to absolute mag using distance modulus to M31 of
+        MV = -6.55 # Darnley et al. 2015, section 6.2
+        wave_eff = 5550 # g band wavelength in Angstroms
+        logLV = logLfromMV(MV)
+        AmpV =  3.5
+        AmpVerr = 1.0
+        if timemetric== 't3':
+            t = t3V
+        elif timemetric== 't2':
+            t = t3V * (2. / 3.)
+        elif timemetric== 't1/2':
+            t = t3V / (3 / (2.5*np.log10(2.)))
+        elif timemetric=='Prec' or timemetric=='trec':
+            t = np.log10(1.0) # recurrence time in years
+        else:
+            raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
+        if luminositymetric=='Lpk':
+            ax.plot(t, logLV, marker='+', color=color,
+                    ms=rcParams['lines.markersize']*2,
+                    lw=rcParams['lines.linewidth']*1.3,
+                    mew=rcParams['lines.linewidth']*2,
+                    label='_M31N-2008-12a (V)')
+        elif luminositymetric=='Amp':
+            #ax.errorbar(t, AmpV, yerr=[[0],[AmpVerr]], lolims=True,
+            #            marker=marker, color='darkcyan', ms=12,
+            #            label='_M31N-2008-12a (V)')
+            ax.errorbar(t, AmpV, marker='+', color=color,
+                        ms=rcParams['lines.markersize']*2,
+                        lw=rcParams['lines.linewidth']*1.3,
+                        mew=rcParams['lines.linewidth']*2,
+                        label='_M31N-2008-12a (V)')
+            # ax.text(t*3, AmpV*0.5, 'M31N-2008-12a', color='darkcyan',
+            #        fontsize='small', ha='left', va='top')
+
+    if 'R' in plotbands:
+        wave_eff = 6670 # R band wavelength in Angstroms
+        t3R = 4.8 # Darnley et al. 2015, Table 5
+        MR = -6.6 # Tang et al. 2014 (abstract)
+        logLR = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MR)
+        if timemetric== 't3':
+            t = t3R
+        elif timemetric== 't2':
+            t = t3R * (2 / 3.)
+        elif timemetric== 't1/2':
+            t = t3R / (3 / (2.5*np.log10(2.)))
+        elif timemetric=='Prec' or timemetric=='trec':
+            t = np.log10(1.0) # recurrence time in years
+        else:
+            raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
+        ax.plot(t, logLR, marker=marker, color='darkorange', ms=12,
+                label='_M31N-2008-12a (R)')
     return
 
 
 def plot_yaron2005_models(
+        timemetric='t2', luminositymetric='Amp', ax=None,
         datfile=os.path.join(__THISDIR__,'data/yaron2005_table3.dat'),
-        declinetimemetric='t2'):
-    """  plot the peak luminosity vs decline time from Yaron et al 2005
-    :param datfile:
+        markersizemetric='MWD', markercolormetric='logMdot',
+        markersizelegend=True, markercolorlegend=True):
+    """  plot the peak luminosity vs time (decline/recurrence) from
+    Yaron et al 2005
+    :param datfile: name of the data file with the Yaron+ 2005 data
     :return:
     """
+    if ax is None:
+        ax = pl.gca()
     indat = ascii.read(datfile, format='commented_header',
                        header_start=-1, data_start=0)
     # MWD  TWD logMdot vmax vavg L4max A t3bol tml Prec
 
-    if declinetimemetric=='t3':
-        tdecline = indat['t3bol']
-    elif declinetimemetric=='t2':
-        tdecline = indat['t3bol'] * 2. / 3.
-    elif declinetimemetric=='t1/2':
-        tdecline = indat['t3bol'] / (3 / (2.5*np.log10(2.)))
+    if timemetric== 't3':
+        t = indat['t3bol']
+    elif timemetric== 't2':
+        t = indat['t3bol'] * 2. / 3.
+    elif timemetric== 't1/2':
+        t = indat['t3bol'] / (3 / (2.5*np.log10(2.)))
+    elif timemetric in ['trec', 'Prec']:
+        t = np.log10(indat['Prec'])
     else:
         raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
 
-    MV = indat['A']
+    Amp = indat['A']
     L4max = indat['L4max'] * 0.4
     # the factor of 0.4 accounts for the correction from bolometric
     # luminosity to visual band luminosity (using BC=-0.1 mag from
@@ -437,11 +489,58 @@ def plot_yaron2005_models(
     # convert bolometric luminosity from units of 10^4 Lsun to erg/s
     Lsun = 3.86e33 # ergs/s
     logLmax = np.log10(L4max * 1e4 * Lsun)
-    pl.plot(tdecline, logLmax, marker='o', ls=' ', ms=8, color='k', mfc='w')
+    if luminositymetric=='Amp':
+        y = Amp
+    else :
+        y = logLmax
+
+    if markersizemetric=='MWD':
+        msmin = 0.5 * rcParams['lines.markersize']
+        msmax = 2 * rcParams['lines.markersize']
+        mwd = indat['MWD']
+        ms = (msmax-msmin) * ((mwd-mwd.min())/(mwd.max()-mwd.min())) + msmin
+
+        if markersizelegend:
+            ax.plot(-1, -1, marker='o', ls=' ', ms=msmax, mfc='w', mec='k',
+                    label='1.4')
+            ax.plot(-1, -1, marker='o', ls=' ', ms=(msmax+msmin)/2.,
+                    mfc='w', mec='k',  label='0.9')
+            ax.plot(-1, -1, marker='o', ls=' ', ms=msmin, mfc='w', mec='k',
+                    label='0.4')
+    else:
+        ms = [rcParams['ms'] for i in range(len(t))]
+
+    if markercolormetric=='logMdot':
+        logMdot = indat['logMdot']
+        colorscale = (logMdot - logMdot.min()) / (logMdot.max()-logMdot.min())
+        color = cm.Spectral(colorscale)
+        if markercolorlegend:
+            colormax = cm.Spectral(0.99)
+            colormid = cm.Spectral(0.5)
+            colormin = cm.Spectral(0.01)
+            # import pdb; pdb.set_trace()
+            ax.plot(-1, -1, marker='o', ls=' ',
+                    ms=1.2*rcParams['lines.markersize'],
+                    mfc=colormax, mec='k', alpha=1,
+                    label='10$^{-6}$')
+            ax.plot(-1, -1, marker='o', ls=' ',
+                    ms=1.2*rcParams['lines.markersize'],
+                    mfc=colormid, mec='k', alpha=1,
+                    label='10$^{-9}$')
+            ax.plot(-1, -1, marker='o', ls=' ',
+                    ms=1.2*rcParams['lines.markersize'],
+                    mfc=colormin, mec='k', alpha=1,
+                    label='10$^{-12.3}$')
+    else:
+        color=['k' for i in range(len(t))]
+
+    for i in range(len(t)):
+        ax.plot(t[i], y[i], marker='o', ls=' ', ms=ms[i],
+                color=color[i], mec='k', alpha=0.3, label='_')
 
 
 def plot_mmrd(ax=None, declinetimemetric='t2', livio92=True,
-              dellavalle95=True, tmax=15):
+              dellavalle95=True, tmax=18):
     """ plot the traditional peak luminosity vs decline time
     (i.e. the Max Mag vs Rate of Decline  (MMRD) relation)
     from Della Valle and Livio 1995 or Downes and Duerbeck 2000.
@@ -457,7 +556,7 @@ def plot_mmrd(ax=None, declinetimemetric='t2', livio92=True,
 
     if livio92:
         # Livio 1992
-        MB = np.arange(-10, -7.5, 0.01)
+        MB = np.arange(-10, -7.0, 0.01)
         t3_livio92 = 51.3 * 10**((MB+9.76)/10) * (
             10**(2*(MB+9.76)/30) - 10**(-2*(MB+9.76)/30))**1.5
         logL_livio92 = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * MB)
@@ -491,7 +590,8 @@ def plot_mmrd(ax=None, declinetimemetric='t2', livio92=True,
         else:
             raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
 
-        ax.fill_between(tdecline, logLmin, logLmax, color='k', alpha=0.5)
+        ax.fill_between(tdecline, logLmin, logLmax, color='k', alpha=0.5, zorder=0)
+        ax.fill_between(tdecline, logLmin-0.5, logLmax+0.5, color='k', alpha=0.2, zorder=-5)
 
     if False:
         # Downes and Duerbeck:
@@ -503,8 +603,9 @@ def plot_mmrd(ax=None, declinetimemetric='t2', livio92=True,
     return
 
 import sncosmo
-def plot_typeIa_sne(ax=None):
+def plot_typeIa_sne(ax=None, showIax=True):
     """ make a crude representation of the Phillips relation
+    for normal Type Ia and Iax
     :param ax:
     :return:
     """
@@ -520,6 +621,21 @@ def plot_typeIa_sne(ax=None):
     MVbottom = MV + 0.3
     ax.fill_between(t2, logLfromMV(MVtop), logLfromMV(MVbottom),
                     color='k', alpha=0.3)
+
+    if showIax:
+        MVmax = -14.2
+        MVmin = -18.9
+        t2min = 25
+        t2max = 50
+        t2 = [t2min, t2max]
+        MV = np.array([MVmax, MVmin])
+        MVtop = MV - 1.0
+        MVbottom = MV + 1.0
+        ax.fill_between(t2, logLfromMV(MVtop),
+                        logLfromMV(MVbottom),
+                        color='m', alpha=0.3)
+
+
     return
 
 def plot_kn_candidates(ax=None):
@@ -641,14 +757,14 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
                declinetimemetric=declinetimemetric, plotrisetime=plotrisetime)
 
     plot_mmrd(declinetimemetric=declinetimemetric,
-              livio92=True,  dellavalle95=True)
+              livio92=False, dellavalle95=True)
     # plot_yaron2005_models(declinetimemetric=declinetimemetric)
     plot_classical_novae(declinetimemetric=declinetimemetric, marker='D')
-    plot_recurrent_novae(declinetimemetric=declinetimemetric, marker='o')
+    plot_recurrent_novae(timemetric=declinetimemetric, marker='o')
     plot_kn_candidates(ax1)
 
     mmrd = ax2.plot(-1, -1, ls='-', marker=' ', lw=5, alpha=0.5,
-                    color='k', label='della Valle & Livio 1995')
+                    color='k', label='Max. Mag - Rate of Decline')
     RNe = ax2.plot(-1, -1, ls=' ', marker='o', mfc='w', mec='k', ms=10,
                    label='Recurrent Novae')
     CNe = ax2.plot(-1, -1, ls=' ', marker='D', mfc='w', mec='k', ms=10,
@@ -690,8 +806,13 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
         ax2.set_xlabel('t$_{2}$: time to decline by 2 mag (days)')
     ax2right.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
 
-    fig.subplots_adjust(left=0.16, bottom=0.15,
-                        right=0.83, top=0.97)
+    ax2right.yaxis.set_major_locator(ticker.MultipleLocator(4))
+    ax2right.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax2right.tick_params(pad=4)
+    ax2.tick_params(pad=3)
+
+    fig.subplots_adjust(left=0.14, bottom=0.15,
+                        right=0.85, top=0.97)
     pl.draw()
 
 
@@ -712,23 +833,26 @@ def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
                 fontsize='small', color='k', rotation=-20)
 
     plot_mmrd(ax, declinetimemetric=declinetimemetric, livio92=False,
-              dellavalle95=True, tmax=110)
+              dellavalle95=True, tmax=120)
     plot_typeIa_sne(ax)
-    ax2.text(85, -18.5, 'Type Ia SNe', rotation=53,
+    ax2.text(87, -18.5, 'Type Ia SNe', rotation=53,
              ha='center', va='center',
              fontsize='small', color='k', zorder=1000)
+    ax2.text(90, -16.5, 'Type Iax', rotation=62,
+             ha='center', va='center',
+             fontsize='small', color='darkmagenta', zorder=1000)
 
     ax.text(9, 38.7, 'Novae', ha='right', va='top',
              fontsize='small', color='k')
 
-    ax.set_xlim(0.5,110)
+    ax.set_xlim(0.5,115)
     ax.set_ylim(logLfromMV(-5.2), logLfromMV(-24.5))
     ax.set_xscale('log')
 
 
     # make the M_V axis on the right side
     logLlim = ax.get_ylim()
-    ax2.set_xlim(0.5,110)
+    ax2.set_xlim(0.5,115)
     ax2.set_ylim(MVfromLogL(logLlim[0]), MVfromLogL(logLlim[1]))
 
     pl.setp(ax.get_xticklabels()[0], visible=False)
@@ -748,18 +872,18 @@ def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
 
     crt = Ellipse(xy=(78,-14), width=25, height=5, angle=0,
                   facecolor='darkorange', alpha=0.5, zorder=30)
-    ax2.text(78, -14, 'Ca-Rich\nSNe',
+    ax2.text(77, -13, 'Ca-Rich\nSNe',
              ha='center', va='center',
              fontsize='small', color='k')
 
     lrn = Ellipse(xy=(97,-10.3), width=30, height=7, angle=0,
                   facecolor='darkred', alpha=0.3, zorder=40)
-    ax2.text(97, -10.3, 'Luminous\nRed\nNovae', ha='center', va='center',
+    ax2.text(98, -10.3, 'Luminous\nRed\nNovae', ha='center', va='center',
              fontsize='small', color='darkred')
 
-    ccsn = Rectangle(xy=(75,-20), width=35, height=6, angle=0,
+    ccsn = Rectangle(xy=(75,-20), width=45, height=6, angle=0,
                      facecolor='darkcyan', alpha=0.3, zorder=20)
-    ax2.text(98, -16.5, 'Core\nCollapse\nSNe', ha='center', va='center',
+    ax2.text(101, -15.5, 'Core\nCollapse\nSNe', ha='center', va='center',
              fontsize='small', color='darkcyan')
 
     slsn = Rectangle(xy=(90,-23), width=30, height=2, angle=0,
@@ -782,6 +906,8 @@ def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
                     alpha=0.3)
     ax2.text(35, -12, 'Kilonovae', ha='center', va='center',
              fontsize='small', color='k', zorder=1000)
+    ax2.tick_params(pad=4)
+    ax.tick_params(pad=3)
 
     for shape in [ps1ft, crt, lrn, ccsn, slsn, ptIa, kNe]:
         ax2.add_artist(shape)
@@ -791,7 +917,93 @@ def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
     ax2.yaxis.set_major_locator(ticker.MultipleLocator(4))
     ax2.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
-    fig.subplots_adjust(left=0.16, bottom=0.15,
+    fig.subplots_adjust(left=0.13, bottom=0.15,
                         right=0.83, top=0.97)
+    pl.draw()
+
+
+def mk_amplitude_vs_prec_fig():
+    fig = plotsetup.fullpaperfig()
+    # derive a lower limit on the spock outburst amplitudes by comparing the
+    #  peak mag against the arbitrary baseline magnitude (AB mag = 30)
+    AmpSpock = 5
+    AmpSpockErr = 2
+    trec_yrs_spock = np.log10(150 / 365.)
+
+    ax1 = fig.add_subplot(1,2,1)
+    ax2 = fig.add_subplot(1,2,2, sharex=ax1)
+    for lolims, marker, zorder in zip([2, 0],['D',' '],[2000,-100]):
+        #ax1.errorbar([trec_yrs_spock1,], [AmpSpock1mid,],
+        #             [[AmpSpock1err],[AmpSpock1err*lolims]],
+        #             lolims=lolims, marker=marker, color='darkgreen',
+        #             alpha=0.5, ls=' ')
+        ax1.errorbar(trec_yrs_spock, AmpSpock,
+                     [[AmpSpockErr],[AmpSpockErr*lolims]],
+                     lolims=lolims, marker=marker,
+                     alpha=1, ls=' ', color='darkred',
+                     lw=rcParams['lines.linewidth']*1.3,
+                     ms=rcParams['lines.markersize']*1.5,
+                     mec='darkred', mfc='w', zorder=zorder)
+
+    # plot RN from MW and M31:
+    plot_yaron2005_models(timemetric='trec', luminositymetric='Amp', ax=ax1,
+                          markersizelegend=True, markercolorlegend=False)
+    plot_recurrent_novae('trec', 'Amp', marker='x', plotbands=['V'], ax=ax1)
+    ax1.set_xlim(-2.5, 9)
+    ax1.set_ylim(0.1, 25.0)
+    # ax1.set_xscale('log')
+
+    pl.setp(ax1.get_xticklabels()[0], visible=False)
+
+    ax1.set_xlabel('log$_{10}$( Recurrence Period [years])', labelpad=0)
+    ax1.set_ylabel('Outburst Amplitude (mag)', labelpad=0)
+    ax1.tick_params(pad=3)
+
+    # ---------------------------------------------------
+    # Spock:
+    # Precurrence = 3 - 5 months
+    logtrecuryr = np.log10(4 / 12.)
+    # Peak Luminosity = 10^41 erg / s
+    # err_trec = np.
+    logLpk = 41
+    errlogLpk = 1
+    ax2.errorbar(logtrecuryr, logLpk,
+                 yerr=errlogLpk, marker='D', color='darkred',
+                 ms=rcParams['lines.markersize']*1.5,
+                 mec='darkred', mfc='w')
+
+    plot_yaron2005_models(timemetric='trec', luminositymetric='Lpk',
+                          ax=ax2, markersizelegend=False,
+                          markercolorlegend=True)
+    plot_recurrent_novae(ax=ax2, timemetric='trec', marker='x',
+                         plotbands=['V'])
+
+    ax1.legend(loc='lower right', markerscale=1,
+               title='M$_{\\rm WD}$ (M$_{\\odot}$)',
+               borderaxespad=0.8, fontsize='small',
+               handletextpad=0.8, frameon=False)
+
+    ax2.legend(loc='upper right', markerscale=1,
+               title='$\dot{\\rm M}$ (M$_{\\odot}$ yr$^{-1}$)',
+               borderaxespad=0.8, fontsize='small',
+               handletextpad=0.8, frameon=False)
+
+    ax2.set_ylim(36.8, 42.4)
+    # ax2.set_xscale('log')
+    axright = ax2.twinx()
+    logLlim = ax2.get_ylim()
+    axright.set_ylim(MVfromLogL(logLlim[0]), MVfromLogL(logLlim[1]))
+    pl.setp(ax2.get_xticklabels()[0], visible=False)
+    ax2.set_ylabel('log$_{10}$($\\nu {\\rm L}_{\\nu,{\\rm pk}}$ [erg/s])', labelpad=0)
+    ax2.set_xlabel('log$_{10}$( Recurrence Period [years])', labelpad=0)
+    axright.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
+    axright.yaxis.set_major_locator(ticker.MultipleLocator(4))
+    axright.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+    axright.tick_params(pad=4)
+    ax2.tick_params(pad=3)
+
+    fig = pl.gcf()
+    fig.subplots_adjust(left=0.07, bottom=0.15, wspace=0.25,
+                        right=0.92, top=0.94)
     pl.draw()
 

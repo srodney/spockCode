@@ -24,6 +24,7 @@ import exceptions
 __cL0__ = 0.13027455 # x10^40 erg s-1 Angstrom   (the 10^40 is handled below)
 MVfromLogL = lambda logL: -2.5*(logL - np.log10(__cL0__ / 5500) - 40)
 logLfromMV = lambda MV: np.log10(__cL0__ / 5500) + 40 - (0.4 * MV)
+logLfromMR = lambda MR: np.log10(__cL0__ / 6525) + 40 - (0.4 * MR)
 
 __THISFILE__ = sys.argv[0]
 if 'ipython' in __THISFILE__:
@@ -634,6 +635,25 @@ def plot_typeIa_sne(ax=None, showIax=True):
 
     return
 
+
+def plot_lbv_rapid_outbursts(ax=None, **kwargs):
+    """ plot some examples of rapid outbursts for two LBV SN-impostors
+    NOTE: all of these decline times are upper limits, b/c of the poor sampling
+    for these rapid outbursts, so we don't know when exactly each burst faded
+    by 2 mags.
+    :return:
+    """
+    if ax == None:
+        ax = pl.gca()
+    t2, logLpk = measure_LBV_decline_times(showplots=False)
+    t2err = np.ones(len(t2))
+    ax.errorbar(t2, logLpk, xerr=t2err, xuplims=True,
+                color='darkorange', marker='d', ls=' ',
+                ms=rcParams['lines.markersize'] * 1.3,
+                label='Rapid LBV outbursts', **kwargs)
+
+
+
 def plot_kn_pointIa_candidates(ax=None):
     """ plot limits for two kilonova candidates and two .Ia candidates
     :return:
@@ -754,8 +774,8 @@ def plot_spock(ax1, ax2=None, mumin=10, mumax=100, declinetimemetric='t2',
 
 
 
-def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
-                              plotrisetime=False):
+def mk_nova_lbv_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
+                                  plotrisetime=False):
     """ Read in the data file giving apparent magnitude vs time inferred from
     the linear fits to four observed bands.  Read in the data file giving the
     K correction as a function of time for converting each observed HST band
@@ -798,7 +818,9 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
                          mfc='w', mec='k', alpha=0.5, ms=8)
     plot_recurrent_novae(timemetric=declinetimemetric, plotbands=['V'],
                          marker='+', color='k', mew=2, ms=10 )
-    plot_kn_pointIa_candidates(ax1)
+    # plot_kn_pointIa_candidates(ax1)
+
+    plot_lbv_rapid_outbursts(ax1)
 
     mmrd = ax2.plot(-1, -1, ls='-', marker=' ', lw=5, alpha=0.5,
                     color='k', label='MMRD')
@@ -1046,8 +1068,68 @@ def mk_amplitude_vs_prec_fig():
                         right=0.92, top=0.94)
     pl.draw()
 
-def measure_LBV_decline_times():
+def measure_LBV_decline_times(showplots=False):
     """ measure the decline time from LBV light curve data
 
     """
+    from .lightcurve import getdata
+    tempdatadir = '/Users/rodney/src/spock/data/LBV_templates/'
 
+    if showplots:
+        pl.clf()
+
+    # m2M is the conversion from observed R-band mag to absolute Magnitude,
+    # including correction for distance modulus and extinction.
+    # SN 2009ip : From Smith+ 2010 and Mauerhan+ 2013 (via Pastorello+ 2013)
+    # SN 2000ch : From Pastorello+ 2010 and
+    t2list = []
+    Mpklist = []
+    for lbv, m2M, label, iax in zip(
+            ['sn2009ip', 'sn2000ch'], [-31.6, -30.17],
+            ['SN 2009ip (2011)', 'NGC 3432-LBV1 (2009-OT1)'], [1, 2]):
+        datfile = '%s.dat' % lbv
+        tempdata = getdata(datfile, tempdatadir)
+        ivalid = np.where(tempdata['Rerr'] > 0)[0]
+        mjd = tempdata['MJD'][ivalid]
+        mag = tempdata['R'][ivalid] + m2M
+        magerr = tempdata['Rerr'][ivalid]
+        time = mjd - mjd.min()
+        maginterp = scint.interp1d(
+            time, mag, bounds_error=False, fill_value=mag.max())
+        ipklist = []
+        for i in range(1,len(time)-1):
+            magpre = mag[i-1]
+            magnow = mag[i]
+            magpost = mag[i+1]
+            if magnow<magpre and magnow<magpost:
+                ipklist.append(i)
+        ipklist = np.array(ipklist)
+
+        if showplots:
+            fig = pl.gcf()
+            ax = fig.add_subplot(2, 1, iax)
+            tplot = np.arange(0, time.max(), 0.5)
+            ax.plot(tplot, maginterp(tplot), 'k-')
+            ax.errorbar(time[ipklist], mag[ipklist], magerr[ipklist], color='r',
+                        marker='o', ls=' ')
+        for i in range(len(ipklist)-1):
+            ithispk = ipklist[i]
+            inextpk = ipklist[i+1]
+            tfall = np.arange(time[ithispk], time[inextpk], 0.1)
+            mfall = maginterp(tfall)
+            mpk = mag[ithispk]
+            i2list = np.where((mfall-mpk)>2)[0]
+            if len(i2list):
+                i2 = i2list[0]
+                t2list.append(tfall[i2]-tfall[0])
+                Mpklist.append(mfall[0])
+                if showplots:
+                    ax.text(time[ithispk]+1, mpk-0.2, '%.1f' % t2list[-1],
+                            color='r', ha='left', va='bottom',
+                            transform=ax.transData)
+            else:
+                continue
+        if showplots:
+            ax.invert_yaxis()
+    logLRlist = logLfromMR(np.array(Mpklist))
+    return np.array(t2list), logLRlist

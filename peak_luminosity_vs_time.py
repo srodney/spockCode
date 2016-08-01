@@ -860,12 +860,14 @@ def mk_nova_lbv_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
 
     pl.setp(ax2.get_xticklabels()[0], visible=False)
 
-    ax1.set_ylabel('log(L$_{\\rm pk}$ [erg/s])', labelpad=0)
+    # ax1.set_ylabel('log(L$_{\\rm pk}$ [erg/s])', labelpad=0)
+    ax1.set_ylabel('log$_{10}$($\\nu {\\rm L}_{\\nu,{\\rm pk}}$ [erg/s])',
+                   labelpad=0)
     if declinetimemetric=='t3':
         ax2.set_xlabel('t$_{3}$: time to decline by 3 mag (days)')
     elif declinetimemetric=='t2':
         ax2.set_xlabel('t$_{2}$: time to decline by 2 mag (days)')
-    ax2right.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
+    ax2right.set_ylabel('Peak Absolute Magnitude', labelpad=12, rotation=-90)
 
     ax2right.yaxis.set_major_locator(ticker.MultipleLocator(4))
     ax2right.yaxis.set_minor_locator(ticker.MultipleLocator(1))
@@ -920,7 +922,7 @@ def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
 
     ax.set_ylabel('log(L$_{\\rm pk}$ [erg/s])', labelpad=0)
     ax.set_xlabel('t$_2$ : time to decline by 2 mag (days)')
-    ax2.set_ylabel('$M_V$ at peak', labelpad=15, rotation=-90)
+    ax2.set_ylabel('Peak Absolute Magnitude', labelpad=15, rotation=-90)
 
     ax.yaxis.tick_left()
 

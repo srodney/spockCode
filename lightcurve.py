@@ -282,13 +282,13 @@ def plot_LBV_lightcurves(ax=None, timeframe='rest', mjdref=__MJDPKNW__):
     if ax is None:
         ax = pl.gca()
 
-    tempdatadir = './data/LBV_templates/'
+    tempdatadir = '/Users/rodney/Dropbox/src/spock/data/LBV_templates/'
     for lbv, band, mjdpk, c, dashes, label in zip(
             ['sn2009ip', 'sn2000ch', 'sn2000ch'],
             ['R','R', 'R'], [55825.15, 54944.41, 55163.71],
             ['darkorchid','darkblue','darkred'],
             [ [10,5,3,5], [10,4], []],
-            ['SN 2009ip (2011)','NGC 3432-LBV1 (2009-OT1)',
+            ['LBV "SN 2009ip" (in 2011)','NGC 3432-LBV1 (2009-OT1)',
              'NGC 3432-LBV1 (2009-OT2)',]):
         datfile = '%s.dat' % lbv
         tempdata = getdata(datfile, tempdatadir)

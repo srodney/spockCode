@@ -86,7 +86,7 @@ def linear_fit_light_curves(linfitbands=['f435w', 'f814w', 'f125w', 'f160w'],
 
         # plot all measured magnitudes
         lightcurve.plot_lightcurve(src=event, aperture=np.inf,
-                                   showtemplates=False, units='mag')
+                                   showRN=False, units='mag')
 
         # NOTE: the rest-frame time is always defined relative to the
         #  *observed* MJD of peak brightness, not the assumed mjdpk
@@ -236,9 +236,9 @@ def plot_ps1_fast_transients(
                      color=color, ls=' ', marker='o', ms=8)
 
 
-def plot_classical_novae(declinetimemetric='t2', marker='D',
+def plot_classical_novae(declinetimemetric='t2',
                          downes2000=True, shafter2011=True,
-                         kasliwal2011=True, czekala2013=True):
+                         kasliwal2011=True, czekala2013=True, **plotkwargs):
     """ Plot squares for the classical novae from the MW and M31,
     using data from Downes & Duerbeck 2000, Shafter 2011, Kasliwal 2011,
     and Czekala 2013
@@ -266,8 +266,8 @@ def plot_classical_novae(declinetimemetric='t2', marker='D',
             tdecline = t3 / (3 / (2.5*np.log10(2.)))
         else:
             raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
-        pl.plot(tdecline , logLV,  marker=marker, mec='k',
-                color='darkcyan', ls=' ', ms=8, label='_Downes & Duerbeck 2000')
+        pl.plot(tdecline , logLV, ls=' ', label='_Downes & Duerbeck 2000',
+                **plotkwargs)
 
     if czekala2013:
         # 3 very bright Classical novae from Czekala et al 2013
@@ -289,10 +289,8 @@ def plot_classical_novae(declinetimemetric='t2', marker='D',
             else:
                 raise exceptions.RuntimeError(
                     "decline time must be t2, t3, or t1/2")
-
             pl.errorbar(tdecline, logLV, # logLVerr, errt2,
-                        marker=marker, mec='k',
-                        color='darkorange', ls=' ', ms=8, label=label)
+                        ls=' ', label=label, **plotkwargs)
 
     if kasliwal2011:
         # Kasliwal+ 2011
@@ -302,8 +300,8 @@ def plot_classical_novae(declinetimemetric='t2', marker='D',
                        26.3, 12.3, 7.5])
         wave_eff = 4718.0
         logLg = np.log10(__cL0__ / wave_eff) + 40 - (0.4 * Mg)
-        pl.errorbar(t2, logLg, marker=marker, mec='k',
-                    color='darkgreen', ls=' ', ms=8, label='_Kasliwal+ 2011')
+        pl.errorbar(t2, logLg, label='_Kasliwal+ 2011',
+                    ls=' ', **plotkwargs)
 
     if shafter2011:
         datfile = os.path.join(__THISDIR__,"data/shafter2011_table6.dat")
@@ -333,16 +331,14 @@ def plot_classical_novae(declinetimemetric='t2', marker='D',
                 raise exceptions.RuntimeError(
                     "decline time must be t2, t3, or t1/2")
             #pl.errorbar(tdecline, logL, yerr=logLerr, xerr=errt2,
-            pl.plot(tdecline, logL,
-                    marker=marker, mec='k', color=plotcolor,
-                    ls=' ', ms=8, label='_Shafter+ 2011')
+            pl.plot(tdecline, logL, label='_Shafter+ 2011',
+                    ls=' ', **plotkwargs)
 
     return
 
 
 def plot_recurrent_novae(timemetric='t2', luminositymetric='Lpk',
-                         marker='d', color='k',
-                         plotbands = 'gBVR', ax=None):
+                         plotbands = 'gBVR', ax=None, **plotkwargs):
     """
     plot the peak luminosity vs decline time for recurrent novae,
     using data from Schaefer 2010
@@ -390,9 +386,9 @@ def plot_recurrent_novae(timemetric='t2', luminositymetric='Lpk',
         yB = AmpB
 
     if 'V' in plotbands:
-        ax.plot(t, yV, marker=marker, color='k', ls=' ', ms=8)
+        ax.plot(t, yV, ls=' ', **plotkwargs)
     if 'B' in plotbands:
-        ax.plot(t, yB, marker=marker, color='blue', ls=' ', ms=8)
+        ax.plot(t, yB, ls=' ', **plotkwargs)
 
     # 2014 eruption of the fast-recurrence nova M31N-2008-12a
     # Darnley et al 2015
@@ -416,7 +412,7 @@ def plot_recurrent_novae(timemetric='t2', luminositymetric='Lpk',
         else:
             raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
         if luminositymetric=='Lpk':
-            ax.plot(t, logLV, marker='+', color=color,
+            ax.plot(t, logLV, marker='+', color='k',
                     ms=rcParams['lines.markersize']*2,
                     lw=rcParams['lines.linewidth']*1.3,
                     mew=rcParams['lines.linewidth']*2,
@@ -425,7 +421,7 @@ def plot_recurrent_novae(timemetric='t2', luminositymetric='Lpk',
             #ax.errorbar(t, AmpV, yerr=[[0],[AmpVerr]], lolims=True,
             #            marker=marker, color='darkcyan', ms=12,
             #            label='_M31N-2008-12a (V)')
-            ax.errorbar(t, AmpV, marker='+', color=color,
+            ax.errorbar(t, AmpV, marker='+', color='k',
                         ms=rcParams['lines.markersize']*2,
                         lw=rcParams['lines.linewidth']*1.3,
                         mew=rcParams['lines.linewidth']*2,
@@ -448,8 +444,8 @@ def plot_recurrent_novae(timemetric='t2', luminositymetric='Lpk',
             t = np.log10(1.0) # recurrence time in years
         else:
             raise exceptions.RuntimeError("decline time must be t2, t3, or t1/2")
-        ax.plot(t, logLR, marker=marker, color='darkorange', ms=12,
-                label='_M31N-2008-12a (R)')
+        ax.plot(t, logLR, label='_M31N-2008-12a (R)',
+                ls=' ', **plotkwargs)
     return
 
 
@@ -638,22 +634,58 @@ def plot_typeIa_sne(ax=None, showIax=True):
 
     return
 
-def plot_kn_candidates(ax=None):
-    """ plot limits for two kilonova candidates
+def plot_kn_pointIa_candidates(ax=None):
+    """ plot limits for two kilonova candidates and two .Ia candidates
     :return:
     """
     if ax == None:
         ax = pl.gca()
 
+    # NOTE: the supplemental info in the Perets+ 2010 nature paper
+    # seems to have an error in the timescale for figure S4.
+    # The top panel suggests a much more rapid decline than shown
+    # in the bottom panel.  Kasliwal+ 2010 have SN 2005E as a
+    # much slower declining SN, so I think that the bottom panel
+    # is correct.
+    # # SN 2005E  Perets+ 2010
+    # logLpk = logLfromMV(-15.25)
+    # t2 = 25
+    # ax.plot(t2, logLpk, marker='*', color='b',
+    #         ms=rcParams['lines.markersize']*1.5, label='_SN205E')
+    # ax.text(t2+0.75, logLpk-0.3, 'SN 2005E (.Ia?)', color='b',
+    #         ha='right', va='center', fontsize='small',
+    #         transform=ax.transData)
+
+    # SN 2002bj  Poznanski+ 2010
+    logLpk = logLfromMV(-18.5)
+    t2 = 12.5
+    ax.plot(t2, logLpk, marker='*', color='darkorange',
+            ms=rcParams['lines.markersize']*1.5, label='_SN2002bj')
+    ax.text(t2-0.5, logLpk, 'SN 2002bj (.Ia?)', color='darkorange',
+            ha='right', va='center', fontsize='small',
+            transform=ax.transData)
+
+    # SN 2010X  Kasliwal+ 2011
+    logLpk = logLfromMV(-17)
+    t2 = 14
+    ax.plot(t2, logLpk, marker='*', color='m',
+            ms=rcParams['lines.markersize']*1.5, label='_SN2010Xj')
+    ax.text(t2-0.5, logLpk, 'SN 2010X (.Ia?)', color='magenta',
+            ha='right', va='center', transform=ax.transData,
+            fontsize='small')
+
     # perley+ 2009
     logLpk = 41.2
     t2min = 6
-    ax.plot(t2min, logLpk, marker='|', color='darkgreen',
+    ax.plot(t2min, logLpk, marker='|', color='darkcyan',
             ms=rcParams['lines.markersize']*1.5)
     arr = FancyArrowPatch( [t2min, logLpk], [t2min+2,logLpk],
                            arrowstyle='-|>', mutation_scale=25,
-                           fc='darkgreen', ls='solid')
+                           fc='darkcyan', ls='solid')
     ax.add_patch(arr)
+    ax.text(t2min-0.5, logLpk+0.2, 'GRB 080503 (KN?)', color='darkcyan',
+            ha='left', va='bottom', transform=ax.transData,
+            fontsize='small')
 
     # Berger+2013, Tanvir+2013
     zkn = 0.356
@@ -662,13 +694,16 @@ def plot_kn_candidates(ax=None):
 
     logLpkmin = logLfromMV(MABpk)
     t2 = 0.578
-    ax.plot(t2, logLpkmin, marker='_', color='darkblue',
+    ax.plot(t2, logLpkmin, marker='_', color='darkorchid',
             ms=rcParams['lines.markersize']*1.5)
 
     arr2 = FancyArrowPatch([t2, logLpkmin], [t2, logLpkmin+0.7],
                            arrowstyle='-|>', mutation_scale=25,
-                           fc='darkblue', ls='solid')
+                           fc='darkorchid', ls='solid')
     ax.add_patch(arr2)
+    ax.text(t2-0.2, logLpkmin-0.5, 'SGRB 130603B (KN?)', color='darkorchid',
+            ha='left', va='bottom', transform=ax.transData,
+            fontsize='small')
 
 
 
@@ -759,19 +794,21 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     plot_mmrd(declinetimemetric=declinetimemetric,
               livio92=False, dellavalle95=True)
     # plot_yaron2005_models(declinetimemetric=declinetimemetric)
-    plot_classical_novae(declinetimemetric=declinetimemetric, marker='D')
-    plot_recurrent_novae(timemetric=declinetimemetric, marker='o')
-    plot_kn_candidates(ax1)
+    plot_classical_novae(declinetimemetric=declinetimemetric, marker='o',
+                         mfc='w', mec='k', alpha=0.5, ms=8)
+    plot_recurrent_novae(timemetric=declinetimemetric, plotbands=['V'],
+                         marker='+', color='k', mew=2, ms=10 )
+    plot_kn_pointIa_candidates(ax1)
 
     mmrd = ax2.plot(-1, -1, ls='-', marker=' ', lw=5, alpha=0.5,
-                    color='k', label='Max. Mag - Rate of Decline')
-    RNe = ax2.plot(-1, -1, ls=' ', marker='o', mfc='w', mec='k', ms=10,
-                   label='Recurrent Novae')
-    CNe = ax2.plot(-1, -1, ls=' ', marker='D', mfc='w', mec='k', ms=10,
-                   label='Classical Novae')
-    KNe = ax2.plot(-1, -1, ls='-', marker='>', mfc='w',
-                   color='k', mec='k', ms=10,
-                   label='Kilonova Candidates')
+                    color='k', label='MMRD')
+    RNe = ax2.plot(-1, -1, ls=' ', marker='+', mfc='w', mec='k', ms=10,
+                   label='Rec. Nov.')
+    CNe = ax2.plot(-1, -1, ls=' ', marker='o', mfc='w', mec='k', ms=10,
+                   label='Class. Nov.')
+    #KNe = ax2.plot(-1, -1, ls='-', marker='>', mfc='w',
+    #               color='k', mec='k', ms=10,
+    #               label='Kilonova Candidates')
 
     #plot_ps1_fast_transients(ax1, ax2, plotrisetime=plotrisetime,
     #                         declinetimemetric=declinetimemetric)
@@ -783,6 +820,8 @@ def mk_nova_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
 
     ax2.text(5, 42.0, 'HFF14Spo', ha='right', va='top',
              fontsize='medium', color='k', rotation=-32)
+    ax2.text(3.2, 38.0, 'M31N 2008-12a', ha='left', va='top',
+             fontsize='small', color='k')
 
     #ax2.text(13, 38.2, 'Novae', ha='right', va='top',
     #         fontsize='medium', color='k')
@@ -1006,4 +1045,9 @@ def mk_amplitude_vs_prec_fig():
     fig.subplots_adjust(left=0.07, bottom=0.15, wspace=0.25,
                         right=0.92, top=0.94)
     pl.draw()
+
+def measure_LBV_decline_times():
+    """ measure the decline time from LBV light curve data
+
+    """
 

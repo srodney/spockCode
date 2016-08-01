@@ -6,6 +6,7 @@ from scipy import interpolate as scint
 import sys
 import os
 import exceptions
+import glob
 
 from constants import __MJDPKNW__, __MJDPKSE__, __Z__, __THISDIR__
 from constants import __MJDPREPK0NW__, __MJDPOSTPK0NW__
@@ -173,9 +174,9 @@ def getdata(datfilename, datadir="./data"):
 
 
 
-def plot_lightcurve(src='se', aperture=np.inf,
-                    showtemplates=False, timeframe='rest',
-                    units='mag'):
+def plot_lightcurve(src='se', aperture=np.inf, showRN=False,
+                    timeframe='rest', units='mag', alpha=0.5,
+                    showlegend=True):
     nw, se = get_spock_data()
     if src.lower() == 'se':
         sn = se
@@ -205,6 +206,10 @@ def plot_lightcurve(src='se', aperture=np.inf,
                            'darkorange', 'r', 'm', 'darkred'],
                           ['o', 'o', 'o',
                            's', 's', 's', 's']):
+        if showlegend:
+            bandlabel = band.upper()
+        else:
+            bandlabel='__nolabel__'
         if units == 'flux':
             iplot = np.where((sn['FILTER'] == band.upper()) &
                              (sn['APER'] == aperture))[0]
@@ -216,15 +221,15 @@ def plot_lightcurve(src='se', aperture=np.inf,
 
             pl.errorbar(t[iplot], sn['FLUX'][iplot] * fmicroJy,
                         sn['FLUXERR'][iplot] * fmicroJy,
-                        marker=m, color=c, ls=' ', alpha=0.5,
-                        label=band.upper())
+                        marker=m, color=c, ls=' ', alpha=alpha,
+                        label=bandlabel)
         elif units == 'mag':
             iplot = np.where((sn['FILTER'] == band.upper()) &
                              (sn['APER'] == aperture) &
                              (sn['FLUX']/sn['FLUXERR'] > 1))[0]
             pl.errorbar(t[iplot], sn['MAG'][iplot], sn['MAGERR'][iplot],
-                        marker=m, color=c, ls=' ', alpha=0.5,
-                        label=band.upper())
+                        marker=m, color=c, ls=' ', alpha=alpha,
+                        label=bandlabel)
 
             ilim = np.where((sn['FILTER'] == band.upper()) &
                              (sn['APER'] == aperture) &
@@ -233,9 +238,9 @@ def plot_lightcurve(src='se', aperture=np.inf,
                       sn['ZP'][ilim])
             pl.errorbar(t[ilim], maglim,
                         [np.zeros(len(ilim)),np.ones(len(ilim))*0.3],
-                        marker=' ', color=c, ls=' ', alpha=0.5,
+                        marker=' ', color=c, ls=' ', alpha=alpha,
                         label='__nolabel__', lolims=True)
-    if showtemplates:
+    if showRN:
         tempdatadir = './data/RN_templates/'
         m31n2008a12 = __TEMPLATEDATAFILES__['M31N 2008-12a (2014)']
         tempdata = getdata(m31n2008a12, tempdatadir)
@@ -243,7 +248,7 @@ def plot_lightcurve(src='se', aperture=np.inf,
             ib = np.where(tempdata['band'] == band)[0]
             mtemp = tempdata['mag'][ib]
             ttemp = tempdata['t'][ib]
-            magmin = m.min()
+            magmin = mtemp.min()
             if timeframe.startswith('obs'):
                 ttemp = (1+__Z__)*ttemp + mjdpk
             pl.plot(ttemp, mtemp - magmin + 26.5,
@@ -271,6 +276,81 @@ def plot_lightcurve(src='se', aperture=np.inf,
                     ha='left', va='center')
             pl.plot([xtext(2.3), xtext(3.9)], [27.4,27.05],
                     ls='-', color='0.3', lw=0.5)
+
+
+def plot_LBV_lightcurves(ax=None, timeframe='rest', mjdref=__MJDPKNW__):
+    if ax is None:
+        ax = pl.gca()
+
+    tempdatadir = './data/LBV_templates/'
+    for lbv, band, mjdpk, c, dashes, label in zip(
+            ['sn2009ip', 'sn2000ch', 'sn2000ch'],
+            ['R','R', 'R'], [55825.15, 54944.41, 55163.71],
+            ['darkorchid','darkblue','darkred'],
+            [ [10,5,3,5], [10,4], []],
+            ['SN 2009ip (2011)','NGC 3432-LBV1 (2009-OT1)',
+             'NGC 3432-LBV1 (2009-OT2)',]):
+        datfile = '%s.dat' % lbv
+        tempdata = getdata(datfile, tempdatadir)
+        mjdtemp = tempdata['MJD']
+
+        ttemp = mjdtemp - mjdpk
+        if timeframe.startswith('obs'):
+            ttemp = (1 + __Z__) * ttemp + mjdref
+        mag = tempdata[band]
+        magerr = tempdata[band+'err']
+        ivalid = np.isfinite(mag)
+        if len(ivalid)==0:
+            continue
+        iupperlim = np.where(magerr<0)[0]
+        idetected = np.where(magerr>0)[0]
+        inearpk = np.where(np.abs(ttemp[ivalid]) < 10)[0]
+        if len(inearpk)==0:
+            continue
+        magmin = mag[ivalid][inearpk].min()
+        magtemp = mag - magmin + 26.5
+        ax.plot(ttemp[idetected], magtemp[idetected], ls='-',
+                dashes=dashes, color=c, marker=' ', label=label)
+        #pl.errorbar(ttemp[idetected], magtemp[idetected], magerr[idetected],
+        #            ls=' ', mfc='w', mec=c, color=c, marker='s',
+        #            label='__nolabel__')
+        #pl.errorbar(ttemp[iupperlim], magtemp[iupperlim],
+        #            np.ones(len(iupperlim)), lolims=True,
+        #            ls=' ', mfc='w', mec=c, color=c, marker='s',
+        #            label='__nolabel__')
+
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    return
+
+def mk_LBV_lightcurve_fig(**kwargs):
+
+    axrestlist, axobslist = mklcfig_double(axarrangement='vertical',
+                                           showlegend=False,
+                                           **kwargs)
+
+    for axrest, axobs, mjdpk in zip(axrestlist, axobslist,
+                                    [__MJDPKNW__, __MJDPKSE__]):
+        plot_LBV_lightcurves(axrest)
+        axrest.set_xlim(-90, 90)
+        axrest.xaxis.set_major_locator(ticker.MultipleLocator(20))
+        axrest.xaxis.set_minor_locator(ticker.MultipleLocator(5))
+
+        axobs.set_xlim(-90, 90)
+        axobs.xaxis.set_major_locator(ticker.MultipleLocator(20))
+        axobs.xaxis.set_minor_locator(ticker.MultipleLocator(5))
+        axobs.ticklabel_format(useOffset=False, style='plain')
+        pl.setp(axobs.get_xticklabels(), visible=False)
+        axobs.set_xlabel('')
+
+    fig = pl.gcf()
+    axrest.legend(bbox_to_anchor=(0.98,0.98), bbox_transform=fig.transFigure,
+                  loc='upper right', fontsize='small', handlelength=2.2)
+    fig.subplots_adjust(left=0.1, bottom=0.08, right=0.97, top=0.95,
+                        hspace=0.03)
+
+    pl.draw()
+
 
 def fit_function_to_lightcurve(fitfunction=True):
     foo = """
@@ -338,7 +418,8 @@ def mklcfig_single(event='se', presfig=True, units='mag',
                            "Use one of ['se', 'nw', 1, 2]")
 
     axrest = axobs.twiny()
-    plot_lightcurve(event.lower(), units=units, timeframe='rest', **kwargs)
+    plot_lightcurve(event.lower(), units=units, timeframe='rest',
+                    showlegend=showlegend, **kwargs)
     # axobs.axvspan(-tpkerr,tpkerr,color='0.5', alpha=0.5)
     axrest.set_xlim((axobs.get_xlim()[0] - tpk) / 2.0054,
                     (axobs.get_xlim()[1] - tpk) / 2.0054)
@@ -373,60 +454,95 @@ def mklcfig_single(event='se', presfig=True, units='mag',
 
     if showlegend:
         axrest.legend(loc='upper right', ncol=2, numpoints=1,
-                     columnspacing=0.5,
-                     borderpad=0.4, borderaxespad=0.5,
-                     labelspacing=0.3, markerscale=0.8,
-                     fontsize='small', framealpha=1,
-                     frameon=False,
-                     handletextpad=0.35, handlelength=0.2)
+                      columnspacing=0.5,
+                      borderpad=0.4, borderaxespad=0.5,
+                      labelspacing=0.3, markerscale=0.8,
+                      fontsize='small', framealpha=1,
+                      frameon=False,
+                      handletextpad=0.35, handlelength=0.2)
     # axrest.axhline(0.0, ls='--', color='0.5', lw=0.75)
     # axrest.axvline(0.0, ls='--', color='0.5', lw=0.75)
     return axrest, axobs
 
 
-def mklcfig_double(presfig=False, **kwargs):
+def mklcfig_double(axarrangement='horizontal',
+                   presfig=False, showlegend=True, **kwargs):
     """ Make a double light curve figure.
     :param presfig: size the figure and lines for presentations
     :return:
     """
-    if presfig:
-        plotsetup.presfig(figsize=[10, 6])
+    if axarrangement=='horizontal':
+        if presfig:
+            plotsetup.presfig(figsize=[10, 6])
+        else:
+            plotsetup.fullpaperfig([8, 3.0])
+        pl.clf()
+        fig = pl.gcf()
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2, sharey=ax1)
     else:
-        plotsetup.fullpaperfig([8, 3.0])
+        if presfig:
+            plotsetup.presfig(figsize=[10, 10])
+        else:
+            plotsetup.fullpaperfig([8, 6])
+        pl.clf()
+        fig = pl.gcf()
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2, sharey=ax1)
 
-    pl.clf()
-    fig = pl.gcf()
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax2 = fig.add_subplot(1, 2, 2, sharey=ax1)
-
+    axrestlist, axobslist = [], []
     for event, ax in zip(
             ['nw', 'se'], [ax1, ax2]):
         fig.sca(ax)
-        axrest, axobs = mklcfig_single(event, presfig=presfig,
-                                       axlabels=(event == 'nw'),
-                                       showlegend=(not presfig and
-                                                   event == 'se'),
-                                       **kwargs)
-        if event=='se':
-            pl.setp(axobs.get_xticklabels()[0:2], visible=False)
-        elif event=='nw':
-            pl.setp(axobs.get_xticklabels()[-2:], visible=False)
+        axrest, axobs = mklcfig_single(
+            event, presfig=presfig,
+            axlabels=((axarrangement=='vertical') or (event == 'nw')),
+            showlegend=(showlegend and not presfig and event == 'se'),
+            **kwargs)
+        if axarrangement == 'horizontal':
+            if event=='se':
+                pl.setp(axobs.get_xticklabels()[0:2], visible=False)
+            elif event=='nw':
+                pl.setp(axobs.get_xticklabels()[-2:], visible=False)
+        else:
+            if event=='se':
+                axrest.yaxis.set_ticks_position('left')
+                axrest.yaxis.set_ticks_position('both')
+                # pl.setp(axrest.get_yticklabels(), visible=True)
+                pl.setp(axobs.get_xticklabels(), visible=False)
+                axobs.set_xlabel('')
+            elif event=='nw':
+                pl.setp(axrest.get_xticklabels(), visible=False)
+                axrest.set_xlabel('')
 
-    ax2.yaxis.set_ticks_position('right')
-    ax2.yaxis.set_ticks_position('both')
+        axrestlist.append(axrest)
+        axobslist.append(axobs)
 
-    if presfig:
-        fig.subplots_adjust(left=0.15, bottom=0.1, right=0.9, top=0.88,
-                            wspace=0.05)
+    if axarrangement == 'horizontal':
+        ax2.yaxis.set_ticks_position('right')
+        ax2.yaxis.set_ticks_position('both')
+
+    if axarrangement=='horizontal':
+        if presfig:
+            fig.subplots_adjust(left=0.15, bottom=0.1, right=0.9, top=0.88,
+                                wspace=0.05)
+        else:
+            fig.subplots_adjust(left=0.1, bottom=0.1, right=0.94, top=0.92,
+                                wspace=0.03)
     else:
-        fig.subplots_adjust(left=0.1, bottom=0.1, right=0.94, top=0.92,
-                            wspace=0.03)
+        if presfig:
+            fig.subplots_adjust(left=0.15, bottom=0.1, right=0.97, top=0.88,
+                                hspace=0.1)
+        else:
+            fig.subplots_adjust(left=0.1, bottom=0.08, right=0.97, top=0.92,
+                                hspace=0.1)
+
 
     #ax1.invert_yaxis()
     #ax2.invert_yaxis()
 
     pl.draw()
-
+    return(axrestlist, axobslist)
 
 
 

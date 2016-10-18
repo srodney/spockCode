@@ -88,6 +88,9 @@ class LensModel(object):
         labels = ['$\mu_{\\rm NW}$', '$\mu_{\\rm SE}$', '$\mu_{\\rm 11.3}$',
                   '$\Delta t_{\\rm NW:SE}$~[days]','$\Delta t_{\\rm NW:11.3}$~[yrs]',
                   ]
+        #labels = ['muNW', 'muSE', 'mu11.3',
+        #          'dt NW:SE [days]', 'dt NW:11.3 [yrs]',
+        #          ]
 
         levels = 1.0 - np.exp(-0.5 * np.array([1.0,2.0]) ** 2)
         corner.corner(self.data, bins=self.nbins, range=self.modelrange,
@@ -135,7 +138,7 @@ def mk_composite_model():
     # read in and join the data from all models
     combotable = None
     weights = np.array([])
-    for modeler in ['oguri', 'zitrin','jauzac','williams']:
+    for modeler in ['oguri', 'zitrin','jauzacB','williams']:
         lensmodel = LensModel(modeler=modeler)
         if combotable is None:
             combotable = lensmodel.table

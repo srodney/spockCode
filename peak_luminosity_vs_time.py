@@ -775,7 +775,7 @@ def plot_spock(ax1, ax2=None, mumin=10, mumax=100, declinetimemetric='t2',
 
 
 def mk_nova_lbv_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
-                                  plotrisetime=False):
+                                  plotrisetime=False, ax=None):
     """ Read in the data file giving apparent magnitude vs time inferred from
     the linear fits to four observed bands.  Read in the data file giving the
     K correction as a function of time for converting each observed HST band
@@ -790,12 +790,15 @@ def mk_nova_lbv_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
         fig.clf()
         ax1 = fig.add_subplot(1,2,1)
         ax2 = fig.add_subplot(1,2,2, sharey=ax1)
-    else:
+    elif ax is None:
         fig = plotsetup.halfpaperfig(figsize=[4, 4])
         fig.clf()
         ax2 = fig.add_subplot(1,1,1)
         ax1 = ax2
-
+    else:
+        fig = pl.gcf()
+        ax1 = ax
+        ax2 = ax
 
     if plotrisetime:
         ax1.set_xlabel('t$_{\\rm rise}$: max rise time from 0 flux (days)')
@@ -825,9 +828,9 @@ def mk_nova_lbv_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
     mmrd = ax2.plot(-1, -1, ls='-', marker=' ', lw=5, alpha=0.5,
                     color='k', label='MMRD')
     RNe = ax2.plot(-1, -1, ls=' ', marker='+', mfc='w', mec='k', ms=10,
-                   label='Rec. Nov.')
+                   label='Recurrent Novae')
     CNe = ax2.plot(-1, -1, ls=' ', marker='o', mfc='w', mec='k', ms=10,
-                   label='Class. Nov.')
+                   label='Classical Novae')
     #KNe = ax2.plot(-1, -1, ls='-', marker='>', mfc='w',
     #               color='k', mec='k', ms=10,
     #               label='Kilonova Candidates')
@@ -880,14 +883,19 @@ def mk_nova_lbv_comparison_figure(mumin=10, mumax=100, declinetimemetric='t2',
 
 
 def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
-                            declinetimemetric='t2'):
+                            declinetimemetric='t2', ax=None):
     """ Plot a wide range of peak luminosities vs decline times
     :return:
     """
-    fig = plotsetup.halfpaperfig(figsize=[4, 4])
-    fig.clf()
-    ax = fig.add_subplot(1,1,1)
-    ax2 = ax.twinx()
+    if ax is None:
+        fig = plotsetup.halfpaperfig(figsize=[4, 4])
+        fig.clf()
+        ax = fig.add_subplot(1,1,1)
+        ax2 = ax.twinx()
+    else:
+        fig = pl.gcf()
+        ax = pl.gca()
+        ax2 = ax.twinx()
 
     if showspock:
         plot_spock(ax, ax2=None, mumin=mumin, mumax=mumax,
@@ -983,6 +991,20 @@ def mk_sn_comparison_figure(showspock=True, mumin=10, mumax=100,
     fig.subplots_adjust(left=0.13, bottom=0.15,
                         right=0.83, top=0.97)
     pl.draw()
+
+
+def mk_double_lpk_vs_time_fig():
+    fig = plotsetup.fullpaperfig(figsize=[4,7])
+    fig.clf()
+    ax1 = fig.add_subplot(2,1,1)
+    mk_sn_comparison_figure(ax=ax1)
+    ax2 = fig.add_subplot(2,1,2)
+    mk_nova_lbv_comparison_figure(ax=ax2)
+    fig.subplots_adjust(left=0.12, bottom=0.08,
+                        wspace=0.35, hspace=0.2,
+                        right=0.85, top=0.97)
+    pl.draw()
+
 
 
 def mk_amplitude_vs_prec_fig():
@@ -1135,3 +1157,65 @@ def measure_LBV_decline_times(showplots=False):
             ax.invert_yaxis()
     logLRlist = logLfromMR(np.array(Mpklist))
     return np.array(t2list), logLRlist
+
+
+def plot_Erad_vs_mag_t2(xi=1.0, mumin=10, mumax=100,
+                        Mquimin = -6, Mquimax=-12):
+    """ Plot the radiated energy vs magnification and decline time
+    """
+    from pytools import plotsetup
+    fig = plotsetup.halfpaperfig()
+    fig.clf()
+
+    magdatfile = os.path.join(__THISDIR__,
+                              'data/magpk_trise_tfall_kcor_ab.dat')
+    indat = ascii.read(magdatfile, format='commented_header',
+                       header_start=-1,data_start=0)
+
+
+    t15 = indat['t2'] * 1.5 / 2.
+
+    distmod = cosmo.mu(__Z__, H0=__H0__, Om=__OM__, Ode=1 - __OM__)
+
+    MABmin = indat['mpk'] - distmod - indat['kcor'] + 2.5 * np.log10(mumax)
+    MABmax = indat['mpk'] - distmod - indat['kcor'] + 2.5 * np.log10(mumin)
+
+    logLfromM = lambda M, wave: np.log10(__cL0__ / wave) + 40 - (0.4 * M)
+
+    # the log of the total radiated energy (in erg), given the decline time
+    # t1.5 (in days) and the log of the peak lum (in erg/s):
+    # following Smith+ 2011b
+    logErad = lambda t15days, logLpkergs: (np.log10(xi) + np.log10(t15days) +
+                                           4.94 + logLpkergs)
+    logEradmindict = {}
+    logEradmaxdict = {}
+    tpkdict = {}
+    for restband in np.unique(indat['restband']):
+        wave_eff = sncosmo.get_bandpass(restband).wave_eff
+        ithisband = np.where((indat['restband']==restband) &
+                             (indat['deltatpk']>=0))[0]
+        logLpkmin = logLfromM(MABmin[ithisband], wave_eff)
+        logLpkmax = logLfromM(MABmax[ithisband], wave_eff)
+
+        logEradmaxdict[restband] = logErad(t15[ithisband], logLpkmax)
+        logEradmindict[restband] = logErad(t15[ithisband], logLpkmin)
+        tpkdict[restband] = indat['deltatpk'][ithisband]
+
+        logLquiMin = logLfromMV(Mquimin)
+        logLquiMax = logLfromMV(Mquimax)
+        logtradmin = logEradmindict[restband] - logLquiMax
+        logtradmax = logEradmaxdict[restband] - logLquiMin
+        tradmaxdays = 10**(logtradmax) / 86400.
+        tradmindays = 10**(logtradmin) / 86400.
+        pl.fill_between(tpkdict[restband], logEradmaxdict[restband],
+                        logEradmindict[restband], alpha=0.3)
+
+        # pl.plot(tpkdict[restband], tradmindays, ls='-', label='%s, min' % restband)
+        # pl.plot(tpkdict[restband], tradmaxdays, ls='--', label='%s, max' % restband)
+
+
+def trad(Mpk, Mqui, t15):
+    Lpk = logLfromMV(Mpk)
+    Lqui = logLfromMV(Mqui)
+    return t15 * (10**(Lpk) / 10**(Lqui))
+

@@ -659,3 +659,49 @@ def microlensing( t, t0, tE, umin):
     u = np.sqrt( umin*umin + ((t-t0)/tE)**2)
     amplification = (u*u + 2) / (u*np.sqrt(u*u+4))
     return amplification-1
+
+
+def mk_photometry_tables(outfile1, outfile2):
+    """Print out the lightcurve data as a latex table. """
+    # read in the data
+    spock1, spock2 = get_spock_data()
+    # convert from observed flux fobs and AB mag zero point
+    # zpAB into f_nu in erg / s / cm ^ 2 / Hz:
+    fobs2fnu = lambda fobs, zpAB: fobs * 10 ** (-0.4 * (zpAB + 48.6))
+
+    def format_row_for_printing(row):
+        fnu = fobs2fnu(row['FLUX'], row['ZP']) * 1e30
+        fnu_err = fobs2fnu(row['FLUXERR'], row['ZP']) * 1e30
+        fluxoutstr = '{:6.3f}$\pm${:5.3f}'.format(fnu, fnu_err)
+        if fnu < 2 * fnu_err:
+            magoutstr = "$<${:.2f}".format(row['MAG'])
+        else:
+            magoutstr = '{:5.2f}$\pm${:4.2f}'.format(
+                row['MAG'], row['MAGERR'])
+        outstr = r'{:8.2f} & {:6s} & {:s} & {:s}\\'.format(
+            row['MJD'], row['FILTER'], fluxoutstr, magoutstr) + '\n'
+        return(outstr)
+
+    footer = """\enddata
+    \end{deluxetable}
+    """
+
+    for spock, outfile, number in zip([spock1, spock2], [outfile1, outfile2],
+                                      ['one', 'two']):
+        header = r"""\begin{deluxetable}{cccc}
+  \tablewidth{\linewidth}
+  \tablecolumns{12}
+  \tablecaption{Photometry of the \spock%s event.\label{tab:spock%sphot}}
+  \tablehead{ \colhead{Date} & \colhead{Filter} & \colhead{Flux} & \colhead{AB Mag}\\
+  \colhead{(MJD)} & \colhead{} & \colhead{(10$^{30}$ erg\,s$^{-1}$\,cm$^{-2}$\,Hz$^{-1}$)} & \colhead{} }
+  \startdata
+  """ %(number, number)
+
+        fout = open(outfile, 'w')
+        fout.write(header)
+        for datarow in spock:
+            outstr = format_row_for_printing(datarow)
+            fout.write(outstr)
+        fout.write(footer)
+        fout.close()
+    return

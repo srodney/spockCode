@@ -215,11 +215,44 @@ def polish_specplot():
     return
 
 
-def plot_OII_image():
+def plot_OII_image(fitsfile='data/MUSE/MACSJ0416_stack_7475_7482.fits'):
     """ plot the OII image from the data cube
     """
+    from astropy.io import fits
+    from matplotlib import cm
+    fitsfile = os.path.join(__THISDIR__, fitsfile)
+    fitsimage = fits.open(fitsfile)
+    pl.clf()
+    ax = pl.gca()
+    hostslice1 = fitsimage[0].data[135:215, 215:315]
+    ax.imshow(hostslice1, cmap=cm.Greys, aspect='equal',
+              interpolation='nearest', alpha=None,
+              vmin=-15, vmax=30, origin='lower', extent=None)
 
 
 
+def plot_OII_linefitdata(datafile='data/MUSE/muse_hostgal_OII_line_fits.txt'):
+    """ make a plot showing results from Italo Balestra's simple gaussian
+    fits to the OII lines
+    :return:
+    """
+    from astropy.io import ascii
+    datafile = os.path.join(__THISDIR__, datafile)
+    datatable = ascii.read(datafile, format='commented_header',
+                           header_start=-1, data_start=0)
+    pl.clf()
+    ax = pl.gca()
+    ax.plot(datatable['d_spock2'],
+            datatable['fluxratio3729to3726'] /
+            datatable['fluxratio3729to3726'][-1],
+            ls=' ', marker='o', color='r')
+    ax.plot(datatable['d_spock2'],
+            datatable['flux3726']/datatable['flux3726'][-1],
+            ls=' ', marker='d', color='b')
+    ax.plot(datatable['d_spock2'],
+            datatable['flux3729']/datatable['flux3729'][-1],
+            ls=' ', marker='d', color='g')
+    ax.set_xlabel('distance from spock-2')
+    ax.set_ylabel('OII flux ratio')
 
 

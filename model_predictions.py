@@ -138,7 +138,7 @@ def mk_composite_model():
     # read in and join the data from all models
     combotable = None
     weights = np.array([])
-    for modeler in ['oguri', 'zitrin','jauzacB','williams']:
+    for modeler in ['oguri', 'zitrin','jauzac','williams']:
         lensmodel = LensModel(modeler=modeler)
         if combotable is None:
             combotable = lensmodel.table

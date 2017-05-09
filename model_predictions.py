@@ -5,34 +5,39 @@ import os
 import sys
 import corner
 from matplotlib import pyplot as pl
+from matplotlib import rcParams
 from astropy import table
+
 
 thisfile = sys.argv[0]
 if 'ipython' in thisfile : thisfile = __file__
 thispath = os.path.abspath( os.path.dirname( thisfile ) )
 
+_MONTECARLODIR_ = "data/MonteCarloChains/"
+_MODEL_LIST_ = ['CATS-A', 'ZLTM','GLAFIC-A','GLEE-A', 'GRALE' ]
+_USETEX_ = rcParams['text.usetex']
 
 class LensModel(object):
-    def __init__(self, modeler=None):
+    def __init__(self, modelname=None):
         self.modelrange = [0.999, 0.999, 0.999, 0.999, 0.999]
         self.weights = None
         self.nbins = 20
-        if modeler is not None:
-            self.modeler = modeler.lower()
+        if modelname is not None:
+            self.modelname = modelname.lower()
             self.load_data()
         else:
-            self.modeler=None
+            self.modelname=None
         return
 
     def load_data(self):
         self.datfile = None
-        for extension in ['.dat','.fits']:
+        for extension in ['_chain.dat','_chain.txt','_chain.fits']:
             datfile = os.path.join(
-                thispath, 'data/' + self.modeler + extension)
+                thispath, _MONTECARLODIR_ + self.modelname + extension)
             if os.path.isfile(datfile):
                 self.datfile = datfile
         if self.datfile is None:
-            print("Cannot find data for %s" % self.modeler)
+            print("Cannot find data for %s" % self.modelname)
             return
 
         if self.datfile.endswith('fits'):
@@ -41,7 +46,7 @@ class LensModel(object):
             dat = ascii.read(self.datfile, format='commented_header',
                              data_start=0, header_start=-1)
 
-        if self.modeler == 'oguri':
+        if self.modelname.upper().startswith('GLAFIC'):
             # compute new columns from the data for plotting
             dat['mu1'] = np.abs(dat['mu1'])  # absolute value of magnifications
             dat['dt13'] = - dat['dt31']  # time delays relative to the NW event
@@ -50,24 +55,26 @@ class LensModel(object):
             self.weights = None
             self.nbins = 20
 
-        elif self.modeler == 'zitrin':
+        elif self.modelname.upper().startswith('ZLTM'):
             self.modelrange = [(20,220),(10,70),(2.8,4.5),(15,70), 0.999]
             self.weights = None
             self.nbins = 15
 
-        elif self.modeler.lower().startswith('jauzac'):
+        elif self.modelname.upper().startswith('CATS'):
             dat['MAGS1'].name = 'mu1'
             dat['MAGS2'].name = 'mu2'
             dat['MAGS3'].name = 'mu3'
-            dat['EMAGS1'].name = 'errmu1'
-            dat['EMAGS2'].name = 'errmu2'
+            #dat['EMAGS1'].name = 'errmu1'
+            #dat['EMAGS2'].name = 'errmu2'
             dat['DTD_S2'].name = 'dt12'
             dat['DTD_S3'].name = 'dt13'
             # self.weights = 1 / np.sqrt(dat['errmu1']**2 + dat['errmu2']**2)
-            self.modelrange = [0.999, 0.999, 0.999, 0.999, 0.999]
+            self.modelrange = [(90,350), (42,55), (3.1,3.6), (-6,3), (-4.55, -3.)]
+            self.modelrange = [0.95, 0.95, 0.95, 0.95, 0.95]
+
             self.nbins = 15
 
-        elif self.modeler == 'williams':
+        elif self.modelname.upper().startswith('GRALE'):
             dat['dt12'] = -dat['dt21']
             dat['dt13'] = -dat['dt31']
             dat['mu1'] = np.abs(dat['mu1'])
@@ -75,6 +82,16 @@ class LensModel(object):
             #                     dat['delx2']**2 + dat['dely2']**2)
             self.modelrange = [(-2,25), (-2,35), (0,5), (-50,10), (-12, -0.5)]
             self.nbins = 12
+
+        elif self.modelname.upper().startswith('GLEE'):
+            dat['t_2o'].name = 'dt12'
+            dat['t_3o'].name = 'dt13'
+            dat['mu1'] = np.abs(dat['m_1o'])
+            dat['mu2'] = np.abs(dat['m_2o'])
+            dat['mu3'] = np.abs(dat['m_3o'])
+            #self.modelrange = [(-2,25), (-2,35), (0,5), (-50,10), (-12, -0.5)]
+            self.modelrange = [(10,350), (35,150), 0.95, 0.95, 0.95]
+            self.nbins = 10
 
         # reformat as an ordered array of samples for corner plotting
         newtable = Table([dat['mu1'], dat['mu2'], dat['mu3'],
@@ -85,12 +102,14 @@ class LensModel(object):
         return
 
     def mk_corner_plot(self, **kwarg):
-        labels = ['$\mu_{\\rm NW}$', '$\mu_{\\rm SE}$', '$\mu_{\\rm 11.3}$',
-                  '$\Delta t_{\\rm NW:SE}$~[days]','$\Delta t_{\\rm NW:11.3}$~[yrs]',
-                  ]
-        #labels = ['muNW', 'muSE', 'mu11.3',
-        #          'dt NW:SE [days]', 'dt NW:11.3 [yrs]',
-        #          ]
+        if _USETEX_:
+            labels = ['$\mu_{\\rm NW}$', '$\mu_{\\rm SE}$', '$\mu_{\\rm 11.3}$',
+                      '$\Delta t_{\\rm NW:SE}$~[days]','$\Delta t_{\\rm NW:11.3}$~[yrs]',
+                      ]
+        else:
+            labels = ['muNW', 'muSE', 'mu11.3',
+                      'dt NW:SE [days]', 'dt NW:11.3 [yrs]',
+                      ]
 
         levels = 1.0 - np.exp(-0.5 * np.array([1.0,2.0]) ** 2)
         corner.corner(self.data, bins=self.nbins, range=self.modelrange,
@@ -113,24 +132,31 @@ class LensModel(object):
             #if modres == modelresults[-1]:
             #    modres = [m/365. for m in modres]
             if abs(modres[0])<10:
-                meanstring = '%s = %.1f $^{+%.1f}_{-%.1f}$ %s' % (
-                    label, round(modres[0],1), round(modres[1],1),
-                    round(modres[2],1), units)
+                mnstrtuple = (label, round(modres[0], 1),
+                                   round(modres[1], 1), round(modres[2], 1),
+                                   units)
+                if _USETEX_:
+                    meanstring = '%s = %.1f $^{+%.1f}_{-%.1f}$ %s' % mnstrtuple
+                else:
+                    meanstring = '%s = %.1f +%.1f -%.1f %s' % mnstrtuple
             else:
-                meanstring = '%s = %i $^{+%i}_{-%i}$ %s' % (
-                    label, round(modres[0]), round(modres[1]),
-                    round(modres[2]), units)
+                mnstrtuple = (label, round(modres[0]), round(modres[1]),
+                              round(modres[2]), units)
+                if _USETEX_:
+                    meanstring = '%s = %i $^{+%i}_{-%i}$ %s' % mnstrtuple
+                else:
+                    meanstring = '%s = %i +%i -%i %s' % mnstrtuple
             print(meanstring)
             fig.text(0.6, ytext, meanstring, fontsize='x-large',
                      ha='left', va='top', transform=fig.transFigure)
             ytext -= 0.05
 
 def mk_composite_model():
-    combomodel = LensModel(modeler=None)
+    combomodel = LensModel(modelname=None)
 
     # define ranges for the 5 model parameters:
     #  muNW, muSE, mu11.3, dt_NW:SE, dt_NW:11.3,
-    combomodel.modelrange = [(-10,150),(-10,150),(2,5),(-30,75),(-7,0)]
+    combomodel.modelrange = [(-10,350),(-10,120),(2.5,4.5),(-25,75),(-7,-3)]
 
     # and set the default number of bins to use in corner plots
     combomodel.nbins = 25
@@ -138,8 +164,8 @@ def mk_composite_model():
     # read in and join the data from all models
     combotable = None
     weights = np.array([])
-    for modeler in ['oguri', 'zitrin','jauzac','williams']:
-        lensmodel = LensModel(modeler=modeler)
+    for modeler in _MODEL_LIST_:
+        lensmodel = LensModel(modelname=modeler)
         if combotable is None:
             combotable = lensmodel.table
         else:

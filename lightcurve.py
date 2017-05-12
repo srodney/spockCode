@@ -576,8 +576,9 @@ def mk_prediction_fig(presfig=False):
     plot_lightcurve(src='se', units='flux', timeframe='observer')
 
     # read in the time delay data
-    timedelaydatfile = os.path.join(__THISDIR__,
-                                    'data/time_delay_predictions.txt')
+    timedelaydatfile = os.path.join(
+        __THISDIR__,
+        "data/TimeDelayMagnificationTables/ALLMODELS_table.dat")
     dtdat = ascii.read(timedelaydatfile,
                        format='commented_header', header_start=-1,
                        data_start=0 )
@@ -608,13 +609,13 @@ def mk_prediction_fig(presfig=False):
     ymin, ymax = ax1.get_ylim()
     yevent = ymin + (ymax - ymin) * 0.6
     ytextHigh = ymin + (ymax - ymin) * 0.9
-    ytextMid = ymin + (ymax - ymin) * 0.7
+    ytextMid = ymin + (ymax - ymin) * 0.5
 
     ax2.text(56726, ytextHigh,
-             '\\noindent Predicted appearance\\\\of Spock-1 event at\\\\'
+             '\\noindent Predicted appearance\\\\of first event at\\\\'
              'the SE position',
              ha='left', va='top', color='darkblue')
-    ax2.annotate('\\noindent Spock-2\\\\ event',
+    ax2.annotate('\\noindent second event\\\\ (Aug. 2014)',
                  xy=(56890, yevent), xytext=(56870, ytextMid),
                  ha='right', va='top', color='darkred',
                  arrowprops=dict(color='darkred', width=0.5, headwidth=3.5,
@@ -622,9 +623,9 @@ def mk_prediction_fig(presfig=False):
 
     ax1.text(56850, ytextHigh,
              '\\raggedleft \\noindent Predicted appearance\n'
-             'of Spock-2 event at \n the NW position',
+             'of second event at \n the NW position',
              ha='right', va='top', color='darkred')
-    ax1.annotate('\\noindent Spock-1\\\\ event',
+    ax1.annotate('\\noindent first event\\\\ (Jan. 2014)',
                  xy=(56680, yevent), xytext=(56700, ytextMid),
                  ha='left', va='top', color='darkblue',
                  arrowprops=dict(color='darkblue', width=0.5, headwidth=3.5,

@@ -5,6 +5,7 @@
 commit.txt
 *.[oa]
 .DS_Store
+.ipynb*
 
 # C extensions
 *.so

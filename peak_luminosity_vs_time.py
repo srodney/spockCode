@@ -958,11 +958,11 @@ def mk_sn_comparison_figure(showspock=True,
              ha='right', va='bottom',
              fontsize='small', color='darkblue')
 
-    crt = Ellipse(xy=(78,-14), width=25, height=5, angle=0,
-                  facecolor='darkorange', alpha=0.5, zorder=30)
-    ax3.text(77, -13, 'Ca-Rich\nSNe',
+    crt = Ellipse(xy=(82,-16), width=20, height=2, angle=0,
+                  facecolor='darkorange', alpha=0.5, zorder=10)
+    ax3.text(72, -14, 'Ca-Rich\nSNe',
              ha='center', va='center',
-             fontsize='small', color='k')
+             fontsize='small', color='darkorange')
 
     lrn = Ellipse(xy=(97,-10.3), width=30, height=7, angle=0,
                   facecolor='darkred', alpha=0.3, zorder=40)

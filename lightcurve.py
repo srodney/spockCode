@@ -173,6 +173,82 @@ def getdata(datfilename, datadir="./data"):
     return None
 
 
+def plot_BVlc(src='se', units='mag', timeframe='rest', showlegend=True,
+              aperture=np.inf, **kwargs):
+    """ Plotting the rest-frame B and V band light curves for comparison
+    to SN 2008ha"""
+    fig = pl.figure(figsize=[4,8])
+    ax = fig.add_subplot(1,1,1)
+    nw, se = get_spock_data()
+
+    if src.lower() == 'se':
+        sn = se
+        mjdpk = __MJDPKSE__
+        band = 'f160w'
+        c='k'
+        m='+'
+    else:
+        sn = nw
+        mjdpk = __MJDPKNW__
+        band = 'f814w'
+        c = 'k'
+        m = 'x'
+
+    if units == 'mag':
+        ax = pl.gca()
+        if not ax.yaxis_inverted():
+            ax.invert_yaxis()
+
+    if timeframe == 'rest':
+        t = (sn['MJD'] - mjdpk) / (1 + __Z__)
+    elif timeframe.startswith('obs'):
+        t = sn['MJD']
+    else:
+        raise exceptions.RuntimeError(
+            "Timeframe must be one of ['rest','obs']")
+
+    if showlegend:
+        bandlabel = band.upper()
+    else:
+        bandlabel='__nolabel__'
+    if units == 'flux':
+        iplot = np.where((sn['FILTER'] == band.upper()) &
+                         (sn['APER'] == aperture))[0]
+        # flux scaling factor to be relative to ZP=25
+        #f25 = 10 ** (-0.4 * (sn['ZP'][iplot] - 25))
+
+        # flux scaling factor to get fnu in microJanskys
+        fmicroJy = (1e6 * 10 ** (-0.4 * (sn['ZP'][iplot] - 8.9)))
+
+        pl.errorbar(t[iplot], sn['FLUX'][iplot] * fmicroJy,
+                    sn['FLUXERR'][iplot] * fmicroJy,
+                    marker=m, color=c, ls=' ',
+                    label=bandlabel)
+    elif units == 'mag':
+        iplot = np.where((sn['FILTER'] == band.upper()) &
+                         (sn['APER'] == aperture) &
+                         (sn['FLUX']/sn['FLUXERR'] > 1))[0]
+        pl.errorbar(t[iplot], sn['MAG'][iplot], sn['MAGERR'][iplot],
+                    marker=m, color=c, ls=' ',
+                    label=bandlabel, **kwargs)
+
+        ilim = np.where((sn['FILTER'] == band.upper()) &
+                         (sn['APER'] == aperture) &
+                         (sn['FLUX']/sn['FLUXERR'] < 1.5))[0]
+        maglim = (-2.5 * np.log10(3 * np.abs(sn['FLUXERR'][ilim])) +
+                  sn['ZP'][ilim])
+        pl.errorbar(t[ilim], maglim,
+                    [np.zeros(len(ilim)),np.ones(len(ilim))*0.3],
+                    marker=' ', color=c, ls=' ',
+                    label='__nolabel__', lolims=True)
+    ax.set_xlim(-12, 102)
+    ax.set_ylim(29.7, 19.3)
+
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(20))
+    ax.xaxis.set_minor_locator(ticker.MultipleLocator(5))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(0.5))
+
 
 def plot_lightcurve(src='se', aperture=np.inf, showRN=False,
                     timeframe='rest', units='mag', alpha=0.5,

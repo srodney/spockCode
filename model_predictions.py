@@ -103,8 +103,10 @@ class LensModel(object):
 
     def mk_corner_plot(self, **kwarg):
         if _USETEX_:
-            labels = ['$\mu_{\\rm NW}$', '$\mu_{\\rm SE}$', '$\mu_{\\rm 11.3}$',
-                      '$\Delta t_{\\rm NW:SE}$~[days]','$\Delta t_{\\rm NW:11.3}$~[yrs]',
+            labels = ['$\mu_{\\rm NW}$', '$\mu_{\\rm SE}$',
+                      '$\mu_{\\rm 11.3}$',
+                      '$\Delta t_{\\rm NW:SE}$~[days]',
+                      '$\Delta t_{\\rm NW:11.3}$~[yrs]',
                       ]
         else:
             labels = ['muNW', 'muSE', 'mu11.3',
@@ -150,6 +152,12 @@ class LensModel(object):
             fig.text(0.6, ytext, meanstring, fontsize='x-large',
                      ha='left', va='top', transform=fig.transFigure)
             ytext -= 0.05
+
+        # also report the observed time between events
+        dtobsstring = '$\Delta t_{\\rm NW:SE, observed}$~=~$234\pm6$~days'
+        fig.text(0.6, ytext, dtobsstring, fontsize='x-large',
+                 ha='left', va='top', transform=fig.transFigure)
+
 
 def mk_composite_model():
     combomodel = LensModel(modelname=None)
